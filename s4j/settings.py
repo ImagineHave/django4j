@@ -26,7 +26,7 @@ SECRET_KEY = '5qroh+@(g((idsj#!*7)kwnvwz42ex)2$v2a7@qfzd#+janef*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['s4j.herokuapp.com']
+ALLOWED_HOSTS = ['s4j.herokuapp.com', 's4j.imagine-have.xyz']
 
 
 # Application definition
@@ -77,8 +77,12 @@ WSGI_APPLICATION = 's4j.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-db_from_env = dj_database_url.config()
-DATABASES = { 'default': dj_database_url.config() }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
 
 
 # Password validation
