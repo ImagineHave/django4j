@@ -26,7 +26,7 @@ SECRET_KEY = '5qroh+@(g((idsj#!*7)kwnvwz42ex)2$v2a7@qfzd#+janef*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['s4j.herokuapp.com']
+ALLOWED_HOSTS = ['s4j.herokuapp.com', 's4j.imagine-have.xyz']
 
 
 # Application definition
