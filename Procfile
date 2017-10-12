@@ -1,1 +1,1 @@
-web: gunicorn s4j.wsgi
+web: gunicorn s4j.wsgi --timeout 600
