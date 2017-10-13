@@ -3,7 +3,11 @@ Created on 26 Aug 2017
 
 @author: Christopher Williams
 '''
+<<<<<<< HEAD
 import nltk, string
+=======
+import nltk, string, threading
+>>>>>>> master
 from s4j import serializers
 from s4j import models
 from rest_framework.views import APIView
@@ -15,19 +19,26 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 class BibleView(APIView):
+    
     def post(self, request, format=None):
+        print("here")
+        thread = threading.Thread(target=self.process, args=(request,))
+        thread.daemon = True                            # Daemonize thread
+        thread.start()                                  # Start the execution
+        return Response("k")
+        
+    def process(self, request):
+        print("bible processing")
         serializer = serializers.BibleSerializer(data=request.data)
         if serializer.is_valid():
             FieldModel.objects.all().delete()
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+            print("bible uploaded")
+        else:
+            print("bible upload failed")
+        
     def get(self, request, format=None):
-        fields = models.FieldModel.objects.all()
-        serializer = serializers.FieldSerializer(fields, many=True)
-        return Response(serializer.data)
-    
+        return Response("neg")
     
 class PrayerView(APIView):
     def post(self, request, format=None):
@@ -42,10 +53,10 @@ class PrayerView(APIView):
             print("models:",FieldModel.objects.values("passage"))
             bestMatch = max(FieldModel.objects.values("passage"), key=lambda item: cosine_sim(request.data.get("prayer"),item.get("passage")))			
             print("best:",bestMatch)
-            field = FieldModel.objects.filter(passage=bestMatch.get("passage"))
+            field = FieldModel.objects.filter(passage=bestMatch.get("passage"))[0]
             print("field:", field)
-            serializer = serializers.FieldSerializer(field, many=True)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer = serializers.FieldSerializer(field)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 def stem_tokens(tokens):
