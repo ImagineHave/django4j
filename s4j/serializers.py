@@ -19,6 +19,7 @@ class ResultSetSerializer(serializers.Serializer):
     row = RowsSerializer(required=False, many=True)
 
 class BibleSerializer(serializers.Serializer):
+    print("serialiser")
     resultset = ResultSetSerializer(required=False)
     
     def create(self, validated_data):
