@@ -123,7 +123,7 @@ class BibleView(APIView):
         print("bible processing")
         d = request.data
         print("well")
-        serializer = serializers.KJVBibleSerializer(data=d)
+        serializer = serializers.BibleSerializer(data=d)
         print("serialised")
         if serializer.is_valid():
             FieldModel.objects.all().delete()
