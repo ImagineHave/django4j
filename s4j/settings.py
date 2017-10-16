@@ -77,6 +77,7 @@ WSGI_APPLICATION = 's4j.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
+# heroku setup
 db_from_env = dj_database_url.config()
 DATABASES = { 'default': dj_database_url.config() }
 
