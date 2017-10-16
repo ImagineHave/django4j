@@ -1,2 +1,3 @@
-gunicorn s4j.wsgi --timeout 600
+web: gunicorn s4j.wsgi
+release: python manage.py migrate
 
