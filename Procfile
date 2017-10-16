@@ -1,3 +1,3 @@
-web: gunicorn s4j.wsgi
 release: python manage.py migrate
+web: gunicorn s4j.wsgi
 
