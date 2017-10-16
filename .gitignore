@@ -1,7 +1,4 @@
 s4j/settings.py
-<<<<<<< HEAD
-=======
 db.sqlite3
 Procfile
->>>>>>> master
 
