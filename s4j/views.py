@@ -26,10 +26,10 @@ class Bible2View(APIView):
         return Response("k", status=status.HTTP_200_OK)
         
     def process(self):
-        bookKey  = open("json/key_english.json", "w", encoding="utf8").readlines()
-        genreKey  = open("json/key_genre_english.json", "w", encoding="utf8").readlines()
-        passageBible = open("json/testbible1.json", "w", encoding="utf8").readlines()
-        processBible = open("json/testbible2.json", "w", encoding="utf8").readlines()
+        bookKey  = open("json/key_english.json").read()
+        genreKey  = open("json/key_genre_english.json").read()
+        passageBible = open("json/testbible1.json").read()
+        processBible = open("json/testbible2.json").read()
         
         self.deleteObjects(FieldModel.objects)
         self.deleteObjects(AnswerModel.objects)
@@ -38,8 +38,6 @@ class Bible2View(APIView):
         
         print("feilds:" + str(FieldModel.objects.all().count()))
         print("answers:" + str(AnswerModel.objects.all().count()))
-        
-        print(type(genreKey))
         
         data = self.c2j(genreKey)
         s = serializers.GenreSerializer(data=data, many=True)
