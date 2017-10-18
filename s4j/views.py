@@ -39,6 +39,8 @@ class Bible2View(APIView):
         print("feilds:" + str(FieldModel.objects.all().count()))
         print("answers:" + str(AnswerModel.objects.all().count()))
         
+        print(type(genreKey))
+        
         data = self.c2j(genreKey)
         s = serializers.GenreSerializer(data=data, many=True)
         if(s.is_valid()):
