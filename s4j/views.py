@@ -55,6 +55,76 @@ class LoadAnswersView(APIView):
         self.deleteObjects(FieldModel.objects)
         print("feilds:"+str(FieldModel.objects.all().count()))
 
+class TestLoadBiblesView(APIView):
+    
+    def post(self, request, format=None):
+        print("post")
+        thread = threading.Thread(target=self.process, args=())
+        thread.daemon = True                            # Daemonize thread
+        thread.start()                                  # Start the execution
+        return Response("k", status=status.HTTP_200_OK)
+        
+    def process(self):
+        bookKey  = open("json/key_english.json").read()
+        genreKey  = open("json/key_genre_english.json").read()
+        passageBible = open("json/testbible1.json").read()
+        processBible = open("json/testbible2").read()
+        
+        self.deleteObjects(FieldModel.objects)
+        self.deleteObjects(AnswerModel.objects)
+        self.deleteObjects(GenreModel.objects)
+        self.deleteObjects(BookModel.objects)
+        
+        print("feilds:" + str(FieldModel.objects.all().count()))
+        print("answers:" + str(AnswerModel.objects.all().count()))
+        
+        data = self.c2j(genreKey)
+        s = serializers.GenreSerializer(data=data, many=True)
+        if(s.is_valid()):
+            self.deleteObjects(GenreModel.objects)
+            s.save()
+        
+        s = serializers.GenreSerializer(GenreModel.objects.all(), many=True)
+        
+        data = self.c2j(bookKey)
+        s = serializers.BookSerializer(data=data, many=True)
+        if(s.is_valid()):
+            self.deleteObjects(BookModel.objects)
+            s.save()
+        
+        data = self.c2j(passageBible)
+        s = serializers.BibleSerializer(data=data)
+        if(s.is_valid()):
+            s.save(bibleName="kjv")
+        else:
+            print(s.errors)
+            
+        print("first bible processed")
+            
+        data = self.c2j(processBible)
+        s = serializers.BibleSerializer(data=data)
+        if(s.is_valid()):
+            s.save(bibleName="asv")
+        else:
+            print(s.errors)
+            
+        print("second bible processed")
+            
+        print(FieldModel.objects.all().count())
+        
+        
+    #convert to json
+    def c2j(self, input):
+        return JSONParser().parse(BytesIO(input))
+        
+    def get(self, request, format=None):
+        print("get")
+        return Response("k", status=status.HTTP_200_OK)
+
+    def deleteObjects(self, objects):#
+        for r in objects.all():
+            r.delete()
+
 class LoadBiblesView(APIView):
     
     def post(self, request, format=None):
