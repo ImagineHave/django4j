@@ -16,7 +16,46 @@ from django.utils.six import BytesIO
 from rest_framework.parsers import JSONParser
 
 
-class Bible2View(APIView):
+class LoadAnswersView(APIView):
+    
+    def post(self, request, format=None):
+        print("post")
+        thread = threading.Thread(target=self.process, args=())
+        thread.daemon = True                            # Daemonize thread
+        thread.start()                                  # Start the execution
+        return Response("k", status=status.HTTP_200_OK)
+        
+    def process(self):
+        
+        print(FieldModel.objects.all().count())
+        
+        for f in FieldModel.objects.filter(bibleName='kjv'):
+            bookNumber = f.book
+            chapter = f.chapter
+            verse = f.verse
+            passage = f.passage
+            bibleName = f.bibleName
+            
+            b = BookModel.objects.filter(bookNumber=bookNumber).first()
+            book = b.book
+            g = GenreModel.objects.filter(genreNumber = b.genreNumber).first()
+            genre = g.genre
+            genreNumber = g.genreNumber
+            
+            bible = FieldModel.objects.filter(bibleName='asv', book=bookNumber, chapter=chapter, verse=verse, passage=passage).first()
+            processed = bible.passage
+            print(bible)
+            print(processed)
+            
+            mapping = {'genre':genre, 'genreNumber':genreNumber, 'book':book, 'bookNumber':bookNumber, 'chapter':f.chapter, 'verse':f.verse, 'passage':passage, 'processed':processed}
+            print(mapping)
+            AnswerModel.objects.create(**mapping)
+            
+        print("answers:"+str(AnswerModel.objects.all().count()))
+        self.deleteObjects(FieldModel.objects)
+        print("feilds:"+str(FieldModel.objects.all().count()))
+
+class LoadBiblesView(APIView):
     
     def post(self, request, format=None):
         print("post")
@@ -69,33 +108,9 @@ class Bible2View(APIView):
         else:
             print(s.errors)
             
+        print("second bible processed")
+            
         print(FieldModel.objects.all().count())
-        
-        for f in FieldModel.objects.filter(bibleName='kjv'):
-            bookNumber = f.book
-            chapter = f.chapter
-            verse = f.verse
-            passage = f.passage
-            bibleName = f.bibleName
-            
-            b = BookModel.objects.filter(bookNumber=bookNumber).first()
-            book = b.book
-            g = GenreModel.objects.filter(genreNumber = b.genreNumber).first()
-            genre = g.genre
-            genreNumber = g.genreNumber
-            
-            bible = FieldModel.objects.filter(bibleName='asv', book=bookNumber, chapter=chapter, verse=verse, passage=passage).first()
-            processed = bible.passage
-            print(bible)
-            print(processed)
-            
-            mapping = {'genre':genre, 'genreNumber':genreNumber, 'book':book, 'bookNumber':bookNumber, 'chapter':f.chapter, 'verse':f.verse, 'passage':passage, 'processed':processed}
-            print(mapping)
-            AnswerModel.objects.create(**mapping)
-            
-        print("answers:"+str(AnswerModel.objects.all().count()))
-        self.deleteObjects(FieldModel.objects)
-        print("feilds:"+str(FieldModel.objects.all().count()))
         
         
     #convert to json
