@@ -68,7 +68,7 @@ class TestLoadBiblesView(APIView):
         bookKey  = open("json/key_english.json").read()
         genreKey  = open("json/key_genre_english.json").read()
         passageBible = open("json/testbible1.json").read()
-        processBible = open("json/testbible2").read()
+        processBible = open("json/testbible2.json").read()
         
         self.deleteObjects(FieldModel.objects)
         self.deleteObjects(AnswerModel.objects)
