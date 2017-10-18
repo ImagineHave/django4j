@@ -28,8 +28,8 @@ class Bible2View(APIView):
     def process(self):
         bookKey  = open("json/key_english.json").read()
         genreKey  = open("json/key_genre_english.json").read()
-        passageBible = open("json/testbible1.json").read()
-        processBible = open("json/testbible2.json").read()
+        passageBible = open("json/t_kjv.json").read()
+        processBible = open("json/t_asv.json").read()
         
         self.deleteObjects(FieldModel.objects)
         self.deleteObjects(AnswerModel.objects)
