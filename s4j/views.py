@@ -54,6 +54,10 @@ class LoadAnswersView(APIView):
         print("answers:"+str(AnswerModel.objects.all().count()))
         self.deleteObjects(FieldModel.objects)
         print("feilds:"+str(FieldModel.objects.all().count()))
+        
+    def deleteObjects(self, objects):
+        for r in objects.all():
+            r.delete()
 
 class TestLoadBiblesView(APIView):
     
