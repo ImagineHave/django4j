@@ -3,7 +3,7 @@ Created on 26 Aug 2017
 
 @author: Christopher Williams
 '''
-import nltk, string, threading
+import nltk, string, threading, gc
 from s4j import serializers
 from s4j import models
 from rest_framework.views import APIView
@@ -29,6 +29,7 @@ class ClearDatabaseView(APIView):
         self.deleteObjects(AnswerModel.objects)
         self.deleteObjects(GenreModel.objects)
         self.deleteObjects(BookModel.objects)
+        
         
     def deleteObjects(self, objects):
         for r in objects.all():
@@ -61,7 +62,6 @@ class ClearAnswersView(APIView):
     
     def process(self):
         self.deleteObjects(AnswerModel.objects)
-        return Response({status:"cleared"}, status=status.HTTP_200_OK)
         
     def deleteObjects(self, objects):
         for r in objects.all():
