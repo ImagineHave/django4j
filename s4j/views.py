@@ -284,6 +284,7 @@ class PrayerView(APIView):
             #random_index = randint(0, FieldModel.objects.count() - 1)
             #quote = FieldModel.objects.values("passage")[random_index]['passage']
             theBible = AnswerModel.objects.all();
+            print("post load")
             bestMatch = max(theBible, key=lambda item: cosine_sim(request.data.get("prayer"),item.get("processed")))			
             field = bestMatch.get("passage")
             serializer = serializers.FieldSerializer(field)
@@ -303,8 +304,6 @@ def normalize(text):
     return stem_tokens(nltk.word_tokenize(text.lower().translate(remove_punctuation_map)))
 	
 def cosine_sim(text1, text2):
-    print(text1)
-    print(text2)
     vectorizer = TfidfVectorizer(tokenizer=normalize, stop_words='english')
     tfidf = vectorizer.fit_transform([text1, text2])
     return ((tfidf * tfidf.T).A)[0,1]
