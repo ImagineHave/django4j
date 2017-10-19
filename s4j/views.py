@@ -189,7 +189,7 @@ class LoadBiblesView(APIView):
         thread.start()                                  # Start the execution
         return Response("k", status=status.HTTP_200_OK)
         
-    def process(self):
+    def process(self, request):
         
         folder = "json/"
         
