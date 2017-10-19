@@ -280,7 +280,7 @@ class PrayerView(APIView):
             print("post save")
             #jesus fuck, this was hard to get right. 
             #how does one make a Model iteratble?!?!
-            #print(request.data.get("prayer"))
+            print(request.data.get("prayer"))
             #random_index = randint(0, FieldModel.objects.count() - 1)
             #quote = FieldModel.objects.values("passage")[random_index]['passage']
             bestMatch = max(AnswerModel.objects.values("processed"), key=lambda item: cosine_sim(request.data.get("prayer"),item.get("processed")))			
@@ -302,6 +302,8 @@ def normalize(text):
     return stem_tokens(nltk.word_tokenize(text.lower().translate(remove_punctuation_map)))
 	
 def cosine_sim(text1, text2):
+    print(text1)
+    print(text2)
     vectorizer = TfidfVectorizer(tokenizer=normalize, stop_words='english')
     tfidf = vectorizer.fit_transform([text1, text2])
     return ((tfidf * tfidf.T).A)[0,1]
