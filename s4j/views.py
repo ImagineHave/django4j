@@ -24,7 +24,7 @@ class ClearDatabaseView(APIView):
         thread.start()                                  # Start the execution
         return Response("clear", status=status.HTTP_200_OK)
     
-    def process(self, request, format=None):
+    def process(self):
         self.deleteObjects(FieldModel.objects)
         self.deleteObjects(AnswerModel.objects)
         self.deleteObjects(GenreModel.objects)
@@ -43,7 +43,7 @@ class ClearFieldsView(APIView):
         thread.start()                                  # Start the execution
         return Response("clear", status=status.HTTP_200_OK)
     
-    def process(self, request, format=None):
+    def process(self):
         self.deleteObjects(FieldModel.objects)
         
     def deleteObjects(self, objects):
@@ -59,7 +59,7 @@ class ClearAnswersView(APIView):
         thread.start()                                  # Start the execution
         return Response("clear", status=status.HTTP_200_OK)
     
-    def process(self, request, format=None):
+    def process(self):
         self.deleteObjects(AnswerModel.objects)
         return Response({status:"cleared"}, status=status.HTTP_200_OK)
         
