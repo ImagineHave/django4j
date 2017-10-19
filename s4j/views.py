@@ -18,11 +18,17 @@ from rest_framework.parsers import JSONParser
 class ClearDatabaseView(APIView):
     
     def post(self, request, format=None):
+        print("post")
+        thread = threading.Thread(target=self.process, args=())
+        thread.daemon = True                            # Daemonize thread
+        thread.start()                                  # Start the execution
+        return Response("clear", status=status.HTTP_200_OK)
+    
+    def process(self, request, format=None):
         self.deleteObjects(FieldModel.objects)
         self.deleteObjects(AnswerModel.objects)
         self.deleteObjects(GenreModel.objects)
         self.deleteObjects(BookModel.objects)
-        return Response({status:"cleared"}, status=status.HTTP_200_OK)
         
     def deleteObjects(self, objects):
         for r in objects.all():
@@ -31,8 +37,14 @@ class ClearDatabaseView(APIView):
 class ClearFieldsView(APIView):
     
     def post(self, request, format=None):
+        print("post")
+        thread = threading.Thread(target=self.process, args=())
+        thread.daemon = True                            # Daemonize thread
+        thread.start()                                  # Start the execution
+        return Response("clear", status=status.HTTP_200_OK)
+    
+    def process(self, request, format=None):
         self.deleteObjects(FieldModel.objects)
-        return Response({status:"cleared"}, status=status.HTTP_200_OK)
         
     def deleteObjects(self, objects):
         for r in objects.all():
@@ -41,6 +53,13 @@ class ClearFieldsView(APIView):
 class ClearAnswersView(APIView):
     
     def post(self, request, format=None):
+        print("post")
+        thread = threading.Thread(target=self.process, args=())
+        thread.daemon = True                            # Daemonize thread
+        thread.start()                                  # Start the execution
+        return Response("clear", status=status.HTTP_200_OK)
+    
+    def process(self, request, format=None):
         self.deleteObjects(AnswerModel.objects)
         return Response({status:"cleared"}, status=status.HTTP_200_OK)
         
