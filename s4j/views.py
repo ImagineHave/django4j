@@ -15,7 +15,39 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from django.utils.six import BytesIO
 from rest_framework.parsers import JSONParser
 
+class ClearDatabaseView(APIView):
+    
+    def post(self, request, format=None):
+        self.deleteObjects(FieldModel.objects)
+        self.deleteObjects(AnswerModel.objects)
+        self.deleteObjects(GenreModel.objects)
+        self.deleteObjects(BookModel.objects)
+        return Response({status:"cleared"}, status=status.HTTP_200_OK)
+        
+    def deleteObjects(self, objects):
+        for r in objects.all():
+            r.delete()
+            
+class ClearFieldsView(APIView):
+    
+    def post(self, request, format=None):
+        self.deleteObjects(FieldModel.objects)
+        return Response({status:"cleared"}, status=status.HTTP_200_OK)
+        
+    def deleteObjects(self, objects):
+        for r in objects.all():
+            r.delete()
 
+class ClearAnswersView(APIView):
+    
+    def post(self, request, format=None):
+        self.deleteObjects(AnswerModel.objects)
+        return Response({status:"cleared"}, status=status.HTTP_200_OK)
+        
+    def deleteObjects(self, objects):
+        for r in objects.all():
+            r.delete()            
+            
 class LoadAnswersView(APIView):
     
     def post(self, request, format=None):
@@ -43,8 +75,8 @@ class LoadAnswersView(APIView):
             genreNumber = g.genreNumber
             
             bible = FieldModel.objects.filter(bibleName='asv', book=bookNumber, chapter=chapter, verse=verse, passage=passage).first()
-            processed = bible.passage
             print(bible)
+            processed = bible.passage
             print(processed)
             
             mapping = {'genre':genre, 'genreNumber':genreNumber, 'book':book, 'bookNumber':bookNumber, 'chapter':f.chapter, 'verse':f.verse, 'passage':passage, 'processed':processed}
@@ -125,7 +157,7 @@ class TestLoadBiblesView(APIView):
         print("get")
         return Response("k", status=status.HTTP_200_OK)
 
-    def deleteObjects(self, objects):#
+    def deleteObjects(self, objects):
         for r in objects.all():
             r.delete()
 
@@ -133,24 +165,20 @@ class LoadBiblesView(APIView):
     
     def post(self, request, format=None):
         print("post")
-        thread = threading.Thread(target=self.process, args=())
+        thread = threading.Thread(target=self.process, args=(request,))
         thread.daemon = True                            # Daemonize thread
         thread.start()                                  # Start the execution
         return Response("k", status=status.HTTP_200_OK)
         
     def process(self):
-        bookKey  = open("json/key_english.json").read()
-        genreKey  = open("json/key_genre_english.json").read()
-        passageBible = open("json/t_kjv.json").read()
-        processBible = open("json/t_asv.json").read()
         
-        self.deleteObjects(FieldModel.objects)
-        self.deleteObjects(AnswerModel.objects)
-        self.deleteObjects(GenreModel.objects)
-        self.deleteObjects(BookModel.objects)
+        folder = "json/"
         
-        print("feilds:" + str(FieldModel.objects.all().count()))
-        print("answers:" + str(AnswerModel.objects.all().count()))
+        bookKey  = open(folder+"key_english.json").read()
+        genreKey  = open(folder+"key_genre_english.json").read()
+        passageBible = open(folder+"t_asv.json").read()
+        processBible = open(folder+"t_asv.json").read()
+    
         
         data = self.c2j(genreKey)
         s = serializers.GenreSerializer(data=data, many=True)
@@ -175,7 +203,7 @@ class LoadBiblesView(APIView):
             
         print("first bible processed")
             
-        data = self.c2j(processBible)
+        data = self.c2j(passageBible)
         s = serializers.BibleSerializer(data=data)
         if(s.is_valid()):
             s.save(bibleName="asv")
