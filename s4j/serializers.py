@@ -4,12 +4,17 @@ Created on 26 Aug 2017
 @author: Christopher Williams
 '''
 from rest_framework import serializers
-from s4j.models import PrayerModel, FieldModel, GenreModel, BookModel, BibleModel
+from s4j.models import PrayerModel, FieldModel, GenreModel, BookModel, BibleModel, AnswerModel
 
 class FieldSerializer(serializers.ModelSerializer):
     class Meta:
         model = FieldModel()
         fields = ('id', 'book', 'chapter', 'verse', 'passage', 'bible',)
+        
+class AnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnswerModel()
+        fields = ('genre', 'genreNumber', 'book', 'bookNumber', 'chapter', 'verse', 'passage', 'processed')
 
 class RowsSerializer(serializers.Serializer):
     field = serializers.ListField(child=serializers.CharField())
