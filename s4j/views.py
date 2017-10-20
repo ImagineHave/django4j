@@ -281,13 +281,13 @@ class PrayerView(APIView):
             #jesus fuck, this was hard to get right. 
             #how does one make a Model iteratble?!?!
             print(request.data.get("prayer"))
-            #random_index = randint(0, FieldModel.objects.count() - 1)
-            #quote = FieldModel.objects.values("passage")[random_index]['passage']
+            random_index = randint(0, FieldModel.objects.count() - 1)
             theBible = list(AnswerModel.objects.all())
             print(len(theBible))
-            print(theBible[0])
-            bestMatch = max(theBible, key=lambda item: cosine_sim(request.data.get("prayer"),item.get("processed")))		
-            field = bestMatch.get("passage")
+            print(theBible[random_index])
+            #bestMatch = max(theBible, key=lambda item: cosine_sim(request.data.get("prayer"),item.get("processed")))		
+            #field = bestMatch.get("passage")
+            field = theBible[random_index]
             serializer = serializers.FieldSerializer(field)
             print(Response(serializer.data, status=status.HTTP_200_OK))
             return Response(serializer.data, status=status.HTTP_200_OK)
