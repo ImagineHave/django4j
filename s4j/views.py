@@ -288,9 +288,10 @@ class PrayerView(APIView):
             #bestMatch = max(theBible, key=lambda item: cosine_sim(request.data.get("prayer"),item.get("processed")))		
             #field = bestMatch.get("passage")
             field = theBible[random_index]
-            serializer = serializers.AnswerSerializer(field)
-            print(Response(serializer.data, status=status.HTTP_200_OK))
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            #serializer = serializers.AnswerSerializer(field)
+            #print(Response(serializer.data, status=status.HTTP_200_OK))
+            #return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response("test",status.HTTP_200_OK)
         else:
             print(serializer.error)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
