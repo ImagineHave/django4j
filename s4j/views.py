@@ -283,7 +283,7 @@ class PrayerView(APIView):
             print(request.data.get("prayer"))
             #random_index = randint(0, FieldModel.objects.count() - 1)
             #quote = FieldModel.objects.values("passage")[random_index]['passage']
-            theBible = AnswerModel.objects.all();
+            theBible = list(AnswerModel.objects.all())
             print(len(theBible))
             bestMatch = max(theBible, key=lambda item: cosine_sim(request.data.get("prayer"),item.get("processed")))		
             field = bestMatch.get("passage")
