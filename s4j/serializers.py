@@ -29,12 +29,14 @@ class BibleSerializer(serializers.Serializer):
         bibleName = validated_data.pop('bibleName')
         rows = resultset_data.pop('row')
         print("bible: " + bibleName)
+        j = 0
         for orderedDictionaryField in rows:
             listing = orderedDictionaryField.pop('field')
             mapping = {'book':listing[1], 'chapter':listing[2], 'verse':listing[3], 'passage':listing[4], 'bibleName':bibleName}
             FieldModel.objects.create(**mapping)
-            if(FieldModel.objects.all().count() % 100 == 0):
-                print(str(int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)) + "%")
+            if(j != int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)):
+                j = int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)
+                print("Progress : " + str(int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)) + "%")
         print(bibleName + " completed")
         return BibleModel.objects.create(**validated_data)
             

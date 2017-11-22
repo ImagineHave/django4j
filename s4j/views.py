@@ -46,7 +46,7 @@ class ClearAndLoadDatabaseView(APIView):
         print("opening .json")
         bookKey  = open("json/key_english.json").read()
         genreKey  = open("json/key_genre_english.json").read()
-        bible = open("json/testbible1.json").read()
+        bible = open("json/asv.json").read()
         
         print("processing genre")
         data = self.c2j(genreKey)
@@ -71,6 +71,7 @@ class ClearAndLoadDatabaseView(APIView):
         print("now loading up answers")
         count = FieldModel.objects.filter(bibleName='asv').count()
         i = float(0)
+        j = 0
         for f in FieldModel.objects.filter(bibleName='asv'):
             bookNumber = f.book
             chapter = f.chapter
@@ -85,11 +86,15 @@ class ClearAndLoadDatabaseView(APIView):
             genreNumber = g.genreNumber
             
             bible = FieldModel.objects.filter(bibleName='asv', book=bookNumber, chapter=chapter, verse=verse, passage=passage).first()
-            processed = self.normalize(bible.passage)
+            processed = self.processWords(bible.passage)
             
             mapping = {'genre':genre, 'genreNumber':genreNumber, 'book':book, 'bookNumber':bookNumber, 'chapter':f.chapter, 'verse':f.verse, 'passage':passage, 'processed':processed}
             AnswerModel.objects.create(**mapping)
-            print("Progress: " + str(int(float(i)/float(count)*100)) + "%")
+            
+            if (j != int(float(i)/float(count)*100)):
+                print("Progress: " + str(j) + "%")
+                j = int(float(i)/float(count)*100)
+                
             i = i + 1
             
         
@@ -104,63 +109,82 @@ class ClearAndLoadDatabaseView(APIView):
     def deleteObjects(self, objects):
         for r in objects.all():
             r.delete()     
-            
-    def stem_tokens(self, tokens):
-        stemmer = nltk.stem.porter.PorterStemmer()
-        return [stemmer.stem(item) for item in tokens]
         
+    def stemSentence(self, text):
+        stemmer = nltk.stem.porter.PorterStemmer()
+        stemmedSentence = ""
+        for word in text.split():
+            stemmedSentence = stemmedSentence + " " + stemmer.stem(word)
+        return stemmedSentence
+	
     '''remove punctuation, lowercase, stem'''
-    def normalize(self, text):
+    def processWords(self, text):
         remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
-        return self.stem_tokens(nltk.word_tokenize(text.lower().translate(remove_punctuation_map)))
+        return self.stemSentence(text.lower().translate(remove_punctuation_map))
     
 class PrayerView(APIView):
+    
     def post(self, request, format=None):
         print("prayer request")
         serializer = serializers.PrayerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            print("prayer saved")
-            #jesus fuck, this was hard to get right. 
-            #how does one make a Model iteratble?!?!
-            print(request.data.get("prayer"))
+            print("prayer saved: " + request.data.get("prayer"))
             theBible = list(AnswerModel.objects.all())
-            #print(len(data.theBible))
-            #print(data.theBible)
-            random_index = randint(0, len(theBible) - 1)
-            #print(random_index)
-            #print(data.theBible[random_index])
-            print(ast.literal_eval(theBible[random_index].processed))
-            stemmed = self.normalize(request.data.get("prayer"))
-            bestMatch = max(theBible, key=lambda item: self.cosine_sim(" ".join(stemmed), " ".join(ast.literal_eval(item.processed))))		
-            #field = bestMatch.passage
-            #field = theBible[random_index]
-            #print(field)
-            serializer = serializers.AnswerSerializer(bestMatch)
+            stemmed = self.process(request.data.get("prayer"))
+            #bestMatch = max(theBible, key=lambda item: self.cosine_sim(stemmed, item.processed))
+            
+            chunk = len(theBible)/5
+            threads = []
+            bestMatch = BestMatch()
+            for i in range(5):
+                j = i + 1
+                t = threading.Thread(target=worker, args=(theBible, stemmed, i*chunk, j*chunk, bestMatch,))
+                threads.append(t)
+                t.start()
+            
+            threads[0].join()
+            threads[1].join()
+            threads[2].join()
+            threads[3].join()
+            threads[4].join()
+            
+            serializer = serializers.AnswerSerializer(bestMatch.bestMatch)
             print(serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             print(serializer.error)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
-    def stem_tokens(self, tokens):
+    def stemSentence(self, text):
         stemmer = nltk.stem.porter.PorterStemmer()
-        return [stemmer.stem(item) for item in tokens]
+        stemmedSentence = ""
+        for word in text.split():
+            stemmedSentence = stemmedSentence + " " + stemmer.stem(word)
+        return stemmedSentence
 	
     '''remove punctuation, lowercase, stem'''
-    def normalize(self, text):
+    def process(self, text):
         remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
-        return self.stem_tokens(nltk.word_tokenize(text.lower().translate(remove_punctuation_map)))
+        return self.stemSentence(text.lower().translate(remove_punctuation_map))
     	
-    def cosine_sim(self, text1, text2):
-        vectorizer = TfidfVectorizer(tokenizer=normalize, stop_words='english')
-        tfidf = vectorizer.fit_transform([text1, text2])
-        return ((tfidf * tfidf.T).A)[0,1]
+def cosine_sim(text1, text2):
+    vectorizer = TfidfVectorizer(norm='l2',min_df=1, use_idf=True, smooth_idf=False, sublinear_tf=True, tokenizer=tokenize, stop_words='english')
+    tfidf = vectorizer.fit_transform([text1, text2])
+    return ((tfidf * tfidf.T).A)[0,1]
+        
+def worker(theBible, stemmed, x, y, bestMatch):
+    bestMatch.set(max(theBible[x:y], key=lambda item: cosine_sim(stemmed, item.processed)), stemmed)		
+        
+tokenize = lambda doc: doc.split()
 
-def normalize(text):
-    remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
-    return stem_tokens(nltk.word_tokenize(text.lower().translate(remove_punctuation_map)))
+class BestMatch():
     
-def stem_tokens(tokens):
-    stemmer = nltk.stem.porter.PorterStemmer()
-    return [stemmer.stem(item) for item in tokens]
+    def __init__(self):
+        self.bestMatch = None
+        
+    def set(self, bestMatch, stemmed):
+        if(self.bestMatch == None):
+            self.bestMatch = bestMatch
+        else:
+            self.bestMatch = max([self.bestMatch, bestMatch], key=lambda item: cosine_sim(stemmed, item.processed))
