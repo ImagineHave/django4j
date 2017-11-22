@@ -134,7 +134,7 @@ class PrayerView(APIView):
             stemmed = self.process(request.data.get("prayer"))
             #bestMatch = max(theBible, key=lambda item: self.cosine_sim(stemmed, item.processed))
             
-            ts = 30
+            ts = int(30)
             chunk = len(theBible)/ts
             threads = []
             bestMatch = BestMatch()
