@@ -3,7 +3,7 @@ Created on 26 Aug 2017
 
 @author: Christopher Williams
 '''
-import nltk, string, threading, gc, ast, logging
+import nltk, string, threading, gc, ast, logging, time
 from s4j import serializers
 from s4j import models
 from rest_framework.views import APIView
@@ -134,7 +134,7 @@ class PrayerView(APIView):
             stemmed = self.process(request.data.get("prayer"))
             #bestMatch = max(theBible, key=lambda item: self.cosine_sim(stemmed, item.processed))
             
-            ts = int(30)
+            ts = int(100)
             chunk = len(theBible)/ts
             threads = []
             bestMatch = BestMatch()
@@ -144,6 +144,8 @@ class PrayerView(APIView):
                 t.daemon = True  
                 threads.append(t)
                 t.start()
+                
+            time.sleep(500)
                 
             for t in threads:
                 t.join()
