@@ -141,6 +141,7 @@ class PrayerView(APIView):
             for i in range(ts):
                 j = i + 1
                 t = threading.Thread(target=worker, args=(theBible, stemmed, i*chunk, j*chunk, bestMatch,))
+                
                 threads.append(t)
                 t.start()
                 t.join()
@@ -174,7 +175,7 @@ logging.basicConfig(level=logging.DEBUG,
                     )
         
 def worker(theBible, stemmed, x, y, bestMatch):
-    logging.debug("processing: " + str(x) + " to " + str())
+    logging.debug("processing: " + str(x) + " to " + str(y))
     bestMatch.set(max(theBible[x:y], key=lambda item: cosine_sim(stemmed, item.processed)), stemmed)
     logging.debug("processing complete")
         
