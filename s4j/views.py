@@ -138,7 +138,7 @@ class PrayerView(APIView):
             chunk = len(theBible)/ts
             threads = []
             bestMatch = BestMatch()
-            for i in range(ts):
+            for i in range(1):
                 j = i + 1
                 t = threading.Thread(target=worker, args=(theBible, stemmed, i*chunk, j*chunk, bestMatch,))
                 t.daemon = True  
