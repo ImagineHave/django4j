@@ -145,7 +145,7 @@ class PrayerView(APIView):
                 threads.append(t)
                 t.start()
                 
-            time.sleep(500)
+            time.sleep(5)
                 
             for t in threads:
                 t.join()
