@@ -141,10 +141,11 @@ class PrayerView(APIView):
             for i in range(ts):
                 j = i + 1
                 t = threading.Thread(target=worker, args=(theBible, stemmed, i*chunk, j*chunk, bestMatch,))
-                
+                t.daemon = True  
                 threads.append(t)
                 t.start()
                 t.join()
+                
             
             serializer = serializers.AnswerSerializer(bestMatch.bestMatch)
             print(serializer.data)

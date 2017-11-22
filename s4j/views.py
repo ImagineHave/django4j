@@ -144,6 +144,8 @@ class PrayerView(APIView):
                 t.daemon = True  
                 threads.append(t)
                 t.start()
+                
+            for t in threads:
                 t.join()
             
             serializer = serializers.AnswerSerializer(bestMatch.bestMatch)
