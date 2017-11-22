@@ -179,7 +179,7 @@ logging.basicConfig(level=logging.DEBUG,
                     )
         
 def worker(theBible, stemmed, x, y, bestMatch):
-    logging.debug("processing: " + str(x) + " to " + str(y))
+    logging.debug("processing: " + str(x) + " to " + str(y) + " len: " + str(len(theBible[x:y])))
     bestMatch.set(max(theBible[x:y], key=lambda item: cosine_sim(stemmed, item.processed)), stemmed)
     logging.debug("processing complete")
         
