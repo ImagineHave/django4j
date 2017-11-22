@@ -144,7 +144,8 @@ class PrayerView(APIView):
                 t.daemon = True  
                 threads.append(t)
                 t.start()
-                
+            
+            print("threads started")
             time.sleep(5)
                 
             for t in threads:
