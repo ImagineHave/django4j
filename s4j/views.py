@@ -3,7 +3,7 @@ Created on 26 Aug 2017
 
 @author: Christopher Williams
 '''
-import nltk, string, threading, gc, ast
+import nltk, string, threading, gc, ast, logging
 from s4j import serializers
 from s4j import models
 from rest_framework.views import APIView
@@ -172,9 +172,15 @@ def cosine_sim(text1, text2):
     vectorizer = TfidfVectorizer(norm='l2',min_df=1, use_idf=True, smooth_idf=False, sublinear_tf=True, tokenizer=tokenize, stop_words='english')
     tfidf = vectorizer.fit_transform([text1, text2])
     return ((tfidf * tfidf.T).A)[0,1]
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='(%(threadName)-10s) %(message)s',
+                    )
         
 def worker(theBible, stemmed, x, y, bestMatch):
-    bestMatch.set(max(theBible[x:y], key=lambda item: cosine_sim(stemmed, item.processed)), stemmed)		
+    logging.debug("processing")
+    bestMatch.set(max(theBible[x:y], key=lambda item: cosine_sim(stemmed, item.processed)), stemmed)
+    logging.debug("processing complete")
         
 tokenize = lambda doc: doc.split()
 
