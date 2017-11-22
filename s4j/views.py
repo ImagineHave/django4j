@@ -134,10 +134,10 @@ class PrayerView(APIView):
             stemmed = self.process(request.data.get("prayer"))
             #bestMatch = max(theBible, key=lambda item: self.cosine_sim(stemmed, item.processed))
             
-            chunk = len(theBible)/5
+            chunk = len(theBible)/10
             threads = []
             bestMatch = BestMatch()
-            for i in range(5):
+            for i in range(10):
                 j = i + 1
                 t = threading.Thread(target=worker, args=(theBible, stemmed, i*chunk, j*chunk, bestMatch,))
                 threads.append(t)
@@ -148,6 +148,11 @@ class PrayerView(APIView):
             threads[2].join()
             threads[3].join()
             threads[4].join()
+            threads[5].join()
+            threads[6].join()
+            threads[7].join()
+            threads[8].join()
+            threads[9].join()
             
             serializer = serializers.AnswerSerializer(bestMatch.bestMatch)
             print(serializer.data)
