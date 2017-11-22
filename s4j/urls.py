@@ -19,12 +19,6 @@ from s4j import views
 
 urlpatterns = [
     url(r'^s4j/p/$', views.PrayerView.as_view()),
-    url(r'^s4j/b/$', views.BibleView.as_view()),
-    url(r'^s4j/lb/$', views.LoadBiblesView.as_view()),
-    url(r'^s4j/tlb/$', views.TestLoadBiblesView.as_view()),
-    url(r'^s4j/la/$', views.LoadAnswersView.as_view()),
-    url(r'^s4j/cdb/$', views.ClearDatabaseView.as_view()),
-    url(r'^s4j/cf/$', views.ClearFieldsView.as_view()),
-    url(r'^s4j/ca/$', views.ClearAnswersView.as_view()),
+    url(r'^s4j/b/$', views.ClearAndLoadDatabaseView.as_view()),
     url(r'^admin/', admin.site.urls),
 ]

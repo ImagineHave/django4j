@@ -24,7 +24,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '5qroh+@(g((idsj#!*7)kwnvwz42ex)2$v2a7@qfzd#+janef*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['s4j.herokuapp.com', 's4j.imagine-have.xyz', 'django4j-cwih.c9users.io']
 
@@ -78,9 +78,12 @@ WSGI_APPLICATION = 's4j.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 # heroku setup
-db_from_env = dj_database_url.config()
-DATABASES = { 'default': dj_database_url.config() }
-
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators

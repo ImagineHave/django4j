@@ -3,7 +3,7 @@ Created on 26 Aug 2017
 
 @author: Christopher Williams
 '''
-import nltk, string, threading, gc
+import nltk, string, threading, gc, ast
 from s4j import serializers
 from s4j import models
 from rest_framework.views import APIView
@@ -15,72 +15,64 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from django.utils.six import BytesIO
 from rest_framework.parsers import JSONParser
 
-class ClearDatabaseView(APIView):
+class ClearAndLoadDatabaseView(APIView):
     
     def post(self, request, format=None):
-        print("post")
+        print("Clearing and loading database")
         thread = threading.Thread(target=self.process, args=())
         thread.daemon = True                            # Daemonize thread
         thread.start()                                  # Start the execution
-        return Response("clear", status=status.HTTP_200_OK)
-    
+        return Response("setting up", status=status.HTTP_202_ACCEPTED)
+        
     def process(self):
+        print("clearing...")
+        self.clear()
+        print("loading...")
+        self.load()
+        print("loaded.")
+    
+    def clear(self):
+        print("clearing objects")
         self.deleteObjects(FieldModel.objects)
+        print("Field model clear")
         self.deleteObjects(AnswerModel.objects)
+        print("Answer model clear")
         self.deleteObjects(GenreModel.objects)
+        print("Genre model clear")
         self.deleteObjects(BookModel.objects)
+        print("Book model clear")
         
+    def load(self):
+        print("opening .json")
+        bookKey  = open("json/key_english.json").read()
+        genreKey  = open("json/key_genre_english.json").read()
+        bible = open("json/asv.json").read()
         
-    def deleteObjects(self, objects):
-        for r in objects.all():
-            r.delete()
+        print("processing genre")
+        data = self.c2j(genreKey)
+        s = serializers.GenreSerializer(data=data, many=True)
+        if(s.is_valid()):
+            s.save()
+        
+        print("processing book")
+        data = self.c2j(bookKey)
+        s = serializers.BookSerializer(data=data, many=True)
+        if(s.is_valid()):
+            s.save()
+        
+        print("processing bible")
+        data = self.c2j(bible)
+        s = serializers.BibleSerializer(data=data)
+        if(s.is_valid()):
+            s.save(bibleName="asv")
+        else:
+            print(s.errors)
             
-class ClearFieldsView(APIView):
-    
-    def post(self, request, format=None):
-        print("post")
-        thread = threading.Thread(target=self.process, args=())
-        thread.daemon = True                            # Daemonize thread
-        thread.start()                                  # Start the execution
-        return Response("clear", status=status.HTTP_200_OK)
-    
-    def process(self):
-        self.deleteObjects(FieldModel.objects)
-        
-    def deleteObjects(self, objects):
-        for r in objects.all():
-            r.delete()
-
-class ClearAnswersView(APIView):
-    
-    def post(self, request, format=None):
-        print("post")
-        thread = threading.Thread(target=self.process, args=())
-        thread.daemon = True                            # Daemonize thread
-        thread.start()                                  # Start the execution
-        return Response("clear", status=status.HTTP_200_OK)
-    
-    def process(self):
-        self.deleteObjects(AnswerModel.objects)
-        
-    def deleteObjects(self, objects):
-        for r in objects.all():
-            r.delete()            
-            
-class LoadAnswersView(APIView):
-    
-    def post(self, request, format=None):
-        print("post")
-        thread = threading.Thread(target=self.process, args=())
-        thread.daemon = True                            # Daemonize thread
-        thread.start()                                  # Start the execution
-        return Response("k", status=status.HTTP_200_OK)
-        
-    def process(self):
-        
-        print(FieldModel.objects.all().count())
-        
-        for f in FieldModel.objects.filter(bibleName='kjv'):
+        print("now loading up answers")
+        count = FieldModel.objects.filter(bibleName='asv').count()
+        i = float(0)
+        j = 0
+        for f in FieldModel.objects.filter(bibleName='asv'):
             bookNumber = f.book
             chapter = f.chapter
             verse = f.verse
@@ -94,79 +86,17 @@ class LoadAnswersView(APIView):
             genreNumber = g.genreNumber
             
             bible = FieldModel.objects.filter(bibleName='asv', book=bookNumber, chapter=chapter, verse=verse, passage=passage).first()
-            print(bible)
-            processed = bible.passage
-            print(processed)
+            processed = self.processWords(bible.passage)
             
             mapping = {'genre':genre, 'genreNumber':genreNumber, 'book':book, 'bookNumber':bookNumber, 'chapter':f.chapter, 'verse':f.verse, 'passage':passage, 'processed':processed}
-            print(mapping)
             AnswerModel.objects.create(**mapping)
             
-        print("answers:"+str(AnswerModel.objects.all().count()))
-        self.deleteObjects(FieldModel.objects)
-        print("feilds:"+str(FieldModel.objects.all().count()))
-        
-    def deleteObjects(self, objects):
-        for r in objects.all():
-            r.delete()
-
-class TestLoadBiblesView(APIView):
-    
-    def post(self, request, format=None):
-        print("post")
-        thread = threading.Thread(target=self.process, args=())
-        thread.daemon = True                            # Daemonize thread
-        thread.start()                                  # Start the execution
-        return Response("k", status=status.HTTP_200_OK)
-        
-    def process(self):
-        bookKey  = open("json/key_english.json").read()
-        genreKey  = open("json/key_genre_english.json").read()
-        passageBible = open("json/testbible1.json").read()
-        processBible = open("json/testbible2.json").read()
-        
-        self.deleteObjects(FieldModel.objects)
-        self.deleteObjects(AnswerModel.objects)
-        self.deleteObjects(GenreModel.objects)
-        self.deleteObjects(BookModel.objects)
-        
-        print("feilds:" + str(FieldModel.objects.all().count()))
-        print("answers:" + str(AnswerModel.objects.all().count()))
-        
-        data = self.c2j(genreKey)
-        s = serializers.GenreSerializer(data=data, many=True)
-        if(s.is_valid()):
-            self.deleteObjects(GenreModel.objects)
-            s.save()
-        
-        s = serializers.GenreSerializer(GenreModel.objects.all(), many=True)
-        
-        data = self.c2j(bookKey)
-        s = serializers.BookSerializer(data=data, many=True)
-        if(s.is_valid()):
-            self.deleteObjects(BookModel.objects)
-            s.save()
-        
-        data = self.c2j(passageBible)
-        s = serializers.BibleSerializer(data=data)
-        if(s.is_valid()):
-            s.save(bibleName="kjv")
-        else:
-            print(s.errors)
+            if (j != int(float(i)/float(count)*100)):
+                print("Progress: " + str(j) + "%")
+                j = int(float(i)/float(count)*100)
+                
+            i = i + 1
             
-        print("first bible processed")
-            
-        data = self.c2j(processBible)
-        s = serializers.BibleSerializer(data=data)
-        if(s.is_valid()):
-            s.save(bibleName="asv")
-        else:
-            print(s.errors)
-            
-        print("second bible processed")
-            
-        print(FieldModel.objects.all().count())
-        
         
     #convert to json
     def c2j(self, input):
@@ -178,137 +108,83 @@ class TestLoadBiblesView(APIView):
 
     def deleteObjects(self, objects):
         for r in objects.all():
-            r.delete()
-
-class LoadBiblesView(APIView):
-    
-    def post(self, request, format=None):
-        print("post")
-        thread = threading.Thread(target=self.process, args=(request,))
-        thread.daemon = True                            # Daemonize thread
-        thread.start()                                  # Start the execution
-        return Response("k", status=status.HTTP_200_OK)
+            r.delete()     
         
-    def process(self, request):
-        
-        folder = "json/"
-        
-        bookKey  = open(folder+"key_english.json").read()
-        genreKey  = open(folder+"key_genre_english.json").read()
-        passageBible = open(folder+"t_asv.json").read()
-        processBible = open(folder+"t_asv.json").read()
-    
-        
-        data = self.c2j(genreKey)
-        s = serializers.GenreSerializer(data=data, many=True)
-        if(s.is_valid()):
-            self.deleteObjects(GenreModel.objects)
-            s.save()
-        
-        s = serializers.GenreSerializer(GenreModel.objects.all(), many=True)
-        
-        data = self.c2j(bookKey)
-        s = serializers.BookSerializer(data=data, many=True)
-        if(s.is_valid()):
-            self.deleteObjects(BookModel.objects)
-            s.save()
-        
-        data = self.c2j(passageBible)
-        s = serializers.BibleSerializer(data=data)
-        if(s.is_valid()):
-            s.save(bibleName="kjv")
-        else:
-            print(s.errors)
-            
-        print("first bible processed")
-            
-        data = self.c2j(passageBible)
-        s = serializers.BibleSerializer(data=data)
-        if(s.is_valid()):
-            s.save(bibleName="asv")
-        else:
-            print(s.errors)
-            
-        print("second bible processed")
-            
-        print(FieldModel.objects.all().count())
-        
-        
-    #convert to json
-    def c2j(self, input):
-        return JSONParser().parse(BytesIO(input))
-        
-    def get(self, request, format=None):
-        print("get")
-        return Response("k", status=status.HTTP_200_OK)
-
-    def deleteObjects(self, objects):#
-        for r in objects.all():
-            r.delete()
-
-class BibleView(APIView):
-    
-    def post(self, request, format=None):
-        print("here")
-        thread = threading.Thread(target=self.process, args=(request,))
-        thread.daemon = True                            # Daemonize thread
-        thread.start()                                  # Start the execution
-        return Response("k")
-        
-    def process(self, request):
-        print("bible processing")
-        d = request.data
-        print("well")
-        serializer = serializers.BibleSerializer(data=d)
-        print("serialised")
-        if serializer.is_valid():
-            FieldModel.objects.all().delete()
-            serializer.save()
-            print("bible uploaded")
-        else:
-            print("bible upload failed")
-        
-    def get(self, request, format=None):
-        return Response("neg")
+    def stemSentence(self, text):
+        stemmer = nltk.stem.porter.PorterStemmer()
+        stemmedSentence = ""
+        for word in text.split():
+            stemmedSentence = stemmedSentence + " " + stemmer.stem(word)
+        return stemmedSentence
+	
+    '''remove punctuation, lowercase, stem'''
+    def processWords(self, text):
+        remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
+        return self.stemSentence(text.lower().translate(remove_punctuation_map))
     
 class PrayerView(APIView):
+    
     def post(self, request, format=None):
-        print("post")
+        print("prayer request")
         serializer = serializers.PrayerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            print("post save")
-            #jesus fuck, this was hard to get right. 
-            #how does one make a Model iteratble?!?!
-            print(request.data.get("prayer"))
+            print("prayer saved: " + request.data.get("prayer"))
             theBible = list(AnswerModel.objects.all())
-            print(len(theBible))
-            random_index = randint(0, len(theBible) - 1)
-            print(theBible[random_index])
-            #bestMatch = max(theBible, key=lambda item: cosine_sim(request.data.get("prayer"),item.get("processed")))		
-            #field = bestMatch.get("passage")
-            field = theBible[random_index]
-            serializer = serializers.AnswerSerializer(field)
-            if serializer.is_valid():
-                print(Response(serializer.data, status=status.HTTP_200_OK))
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                print(serializer.errors)
-                return Response("test",status.HTTP_200_OK)
+            stemmed = self.process(request.data.get("prayer"))
+            #bestMatch = max(theBible, key=lambda item: self.cosine_sim(stemmed, item.processed))
+            
+            chunk = len(theBible)/5
+            threads = []
+            bestMatch = BestMatch()
+            for i in range(5):
+                j = i + 1
+                t = threading.Thread(target=worker, args=(theBible, stemmed, i*chunk, j*chunk, bestMatch,))
+                threads.append(t)
+                t.start()
+            
+            threads[0].join()
+            threads[1].join()
+            threads[2].join()
+            threads[3].join()
+            threads[4].join()
+            
+            serializer = serializers.AnswerSerializer(bestMatch.bestMatch)
+            print(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-def stem_tokens(tokens):
-    stemmer = nltk.stem.porter.PorterStemmer()
-    return [stemmer.stem(item) for item in tokens]
+            
+    def stemSentence(self, text):
+        stemmer = nltk.stem.porter.PorterStemmer()
+        stemmedSentence = ""
+        for word in text.split():
+            stemmedSentence = stemmedSentence + " " + stemmer.stem(word)
+        return stemmedSentence
 	
-'''remove punctuation, lowercase, stem'''
-def normalize(text):
-    remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
-    return stem_tokens(nltk.word_tokenize(text.lower().translate(remove_punctuation_map)))
-	
+    '''remove punctuation, lowercase, stem'''
+    def process(self, text):
+        remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
+        return self.stemSentence(text.lower().translate(remove_punctuation_map))
+    	
 def cosine_sim(text1, text2):
-    vectorizer = TfidfVectorizer(tokenizer=normalize, stop_words='english')
+    vectorizer = TfidfVectorizer(norm='l2',min_df=1, use_idf=True, smooth_idf=False, sublinear_tf=True, tokenizer=tokenize, stop_words='english')
     tfidf = vectorizer.fit_transform([text1, text2])
     return ((tfidf * tfidf.T).A)[0,1]
+        
+def worker(theBible, stemmed, x, y, bestMatch):
+    bestMatch.set(max(theBible[x:y], key=lambda item: cosine_sim(stemmed, item.processed)), stemmed)		
+        
+tokenize = lambda doc: doc.split()
+
+class BestMatch():
+    
+    def __init__(self):
+        self.bestMatch = None
+        
+    def set(self, bestMatch, stemmed):
+        if(self.bestMatch == None):
+            self.bestMatch = bestMatch
+        else:
+            self.bestMatch = max([self.bestMatch, bestMatch], key=lambda item: cosine_sim(stemmed, item.processed))
