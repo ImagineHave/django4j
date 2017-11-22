@@ -134,7 +134,7 @@ class PrayerView(APIView):
             stemmed = self.process(request.data.get("prayer"))
             #bestMatch = max(theBible, key=lambda item: self.cosine_sim(stemmed, item.processed))
             
-            ts = 100
+            ts = 1
             chunk = len(theBible)/ts
             threads = []
             bestMatch = BestMatch()
@@ -174,7 +174,7 @@ logging.basicConfig(level=logging.DEBUG,
                     )
         
 def worker(theBible, stemmed, x, y, bestMatch):
-    logging.debug("processing: " + str(x) + " to " )
+    logging.debug("processing: " + str(x) + " to " + str(x))
     bestMatch.set(max(theBible[x:y], key=lambda item: cosine_sim(stemmed, item.processed)), stemmed)
     logging.debug("processing complete")
         
