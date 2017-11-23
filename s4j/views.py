@@ -41,6 +41,8 @@ class ClearAndLoadDatabaseView(APIView):
         print("Genre model clear")
         self.deleteObjects(BookModel.objects)
         print("Book model clear")
+        self.deleteObjects(WordModel.objects)
+        print("Word model clear")
         
     def load(self):
         print("opening .json")
