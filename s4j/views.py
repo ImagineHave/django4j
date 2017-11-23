@@ -9,7 +9,7 @@ from s4j import models
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from s4j.models import FieldModel, GenreModel, BookModel, AnswerModel
+from s4j.models import FieldModel, GenreModel, BookModel, AnswerModel, WordModel
 from random import randint
 from sklearn.feature_extraction.text import TfidfVectorizer
 from django.utils.six import BytesIO
@@ -46,7 +46,7 @@ class ClearAndLoadDatabaseView(APIView):
         print("opening .json")
         bookKey  = open("json/key_english.json").read()
         genreKey  = open("json/key_genre_english.json").read()
-        bible = open("json/asv.json").read()
+        bible = open("json/tb.json").read()
         
         print("processing genre")
         data = self.c2j(genreKey)
@@ -89,7 +89,15 @@ class ClearAndLoadDatabaseView(APIView):
             processed = self.processWords(bible.passage)
             
             mapping = {'genre':genre, 'genreNumber':genreNumber, 'book':book, 'bookNumber':bookNumber, 'chapter':f.chapter, 'verse':f.verse, 'passage':passage, 'processed':processed}
-            AnswerModel.objects.create(**mapping)
+            
+            answer = AnswerModel.objects.create(**mapping)
+
+            for word in tokenize(processed):
+                #mapping = {'answer':answer,'word':word}
+                #wordModel = WordModel.objects.create(**mapping)
+                wordModel = WordModel(word=word)
+                wordModel.save()
+                wordModel.answers.add(answer)
             
             if (j != int(float(i)/float(count)*100)):
                 print("Progress: " + str(j) + "%")
@@ -130,24 +138,45 @@ class PrayerView(APIView):
         if serializer.is_valid():
             serializer.save()
             print("prayer saved: " + request.data.get("prayer"))
-            theBible = list(AnswerModel.objects.all())
             stemmed = self.process(request.data.get("prayer"))
+            
+            words = []
+            answers = []
+            
+            for word in tokenize(stemmed):
+                words = words + (list(WordModel.objects.filter(word=word)))
+            
+            for word in words:
+                answers = answers + list(word.answers.all())
+            
+            #theBible = list(AnswerModel.objects.all())
+            #stemmed = self.process(request.data.get("prayer"))
             #bestMatch = max(theBible, key=lambda item: self.cosine_sim(stemmed, item.processed))
             
-            chunk = len(theBible)/5
+            theBible = list(set(answers))
+            if len(theBible) == 0:
+                theBible = list(AnswerModel.objects.all())
+                print("had to revert to whole bible")
+            
+            print("Processing " + str(len(theBible)) + " answers")
+            
+            ts = 30
+            if ts > len(theBible):
+                ts = len(theBible)/2
+                
+            chunk = len(theBible)/ts
             threads = []
             bestMatch = BestMatch()
-            for i in range(5):
+            for i in range(ts):
                 j = i + 1
                 t = threading.Thread(target=worker, args=(theBible, stemmed, i*chunk, j*chunk, bestMatch,))
                 threads.append(t)
                 t.start()
             
-            threads[0].join()
-            threads[1].join()
-            threads[2].join()
-            threads[3].join()
-            threads[4].join()
+            print(str(ts) + " threads processing")
+            
+            for t in threads:
+                t.join()
             
             serializer = serializers.AnswerSerializer(bestMatch.bestMatch)
             print(serializer.data)

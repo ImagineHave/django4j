@@ -43,8 +43,14 @@ class AnswerModel(models.Model):
     passage = models.TextField()
     processed = models.TextField()
     
+    def __str__(self):              # __unicode__ on Python 2
+        return self.passage
+    
 class BibleModel(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     name = models.TextField()
     
-    
+class WordModel(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    word = models.TextField()
+    answers = models.ManyToManyField(AnswerModel)
