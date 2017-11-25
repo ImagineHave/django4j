@@ -125,25 +125,25 @@ class PrayerView(APIView):
             answers = []
             
             for word in tokenize(stemmed):
-                answers = answers + (list(AnswerModel.objects.filter(word=word)))
+                answers = answers + (list(set(AnswerModel.objects.filter(word=word))))
             
-            theBible = list(set(answers))
-            if len(theBible) == 0:
-                theBible = list(Answers.objects.all())
+            if len(answers) == 0:
+                answers = list(Answers.objects.all())
                 print("had to revert to whole bible")
             
-            print("Processing " + str(len(theBible)) + " answers")
+            print("Processing " + str(len(answers)) + " answers")
             
             ts = 30
-            if ts > len(theBible):
-                ts = len(theBible)/2
+
+            if ts > len(answers):
+                ts = len(answers)/2
                 
-            chunk = len(theBible)/ts
+            chunk = len(answers)/ts
             threads = []
             bestMatch = BestMatch()
             for i in range(ts):
                 j = i + 1
-                t = threading.Thread(target=worker, args=(theBible, stemmed, i*chunk, j*chunk, bestMatch,))
+                t = threading.Thread(target=worker, args=(answers, stemmed, i*chunk, j*chunk, bestMatch,))
                 t.daemon = True  
                 threads.append(t)
                 t.start()
@@ -155,9 +155,11 @@ class PrayerView(APIView):
             
             serializer = serializers.AnswerSerializer(bestMatch.bestMatch)
             print(serializer.data)
+            gc.enable()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             print(serializer.errors)
+            gc.enable()
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
 def stemSentence(text):
@@ -245,8 +247,9 @@ def worker2(fields):
                 processed = processed,
                 word = wordModel)
         
+        i = i + 1
+        
         if (j != int(float(i)/float(len(fields))*100)):
             logging.debug("Progress: " + str(j) + "%")
             j = int(float(i)/float(len(fields))*100)
             
-        i = i + 1
