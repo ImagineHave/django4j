@@ -31,7 +31,7 @@ class BibleSerializer(serializers.Serializer):
         rows = resultset_data.pop('row')
         print("bible: " + bibleName)
         
-        ts = 30
+        ts = 10
         if ts > len(rows):
             ts = len(rows)/2
                 
@@ -53,14 +53,16 @@ class BibleSerializer(serializers.Serializer):
         return BibleModel.objects.create(**validated_data)
         
 def worker(rows, bibleName):
+    i = 0
     j = 0
     for orderedDictionaryField in rows:
         listing = orderedDictionaryField.pop('field')
         mapping = {'book':listing[1], 'chapter':listing[2], 'verse':listing[3], 'passage':listing[4], 'bibleName':bibleName}
         FieldModel.objects.create(**mapping)
-        if(j != int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)):
-            j = int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)
-            logging.debug("Progress : " + str(int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)) + "%")    
+        if(j != int(float(i)/float(len(rows)) * 100)):
+            j = int(float(i)/float(len(rows)) * 100)
+            logging.debug("Progress : " + str(j) + "%")
+        i = i + 1
             
 class PrayerSerializer(serializers.ModelSerializer):
     class Meta:
