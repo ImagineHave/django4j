@@ -45,6 +45,8 @@ class ClearAndLoadDatabaseView(APIView):
         print("Genre model clear")
         self.deleteObjects(BookModel.objects)
         print("Book model clear")
+        self.deleteObjects(WordModel.objects)
+        print("Word model clear")
         
     def load(self):
         print("opening .json")
@@ -97,8 +99,6 @@ class ClearAndLoadDatabaseView(APIView):
             answer = AnswerModel.objects.create(**mapping)
 
             for word in tokenize(processed):
-                #mapping = {'answer':answer,'word':word}
-                #wordModel = WordModel.objects.create(**mapping)
                 wordModel = WordModel(word=word)
                 wordModel.save()
                 wordModel.answers.add(answer)
