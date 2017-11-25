@@ -22,6 +22,7 @@ class ClearAndLoadDatabaseView(APIView):
     nltk.download('stopwords')
     
     def post(self, request, format=None):
+        stopwords.ensure_loaded()
         print("Clearing and loading database")
         thread = threading.Thread(target=self.process, args=())
         thread.daemon = True                            # Daemonize thread
@@ -79,7 +80,7 @@ class ClearAndLoadDatabaseView(APIView):
         fields = list(FieldModel.objects.filter(bibleName='asv'))
         count = len(fields)
         
-        ts = 10
+        ts = 12
         if ts > len(fields):
             ts = len(fields)/2
                 
@@ -112,6 +113,7 @@ class ClearAndLoadDatabaseView(APIView):
 class PrayerView(APIView):
     
     def post(self, request, format=None):
+        stopwords.ensure_loaded()
         print("prayer request")
         serializer = serializers.PrayerSerializer(data=request.data)
         if serializer.is_valid():
