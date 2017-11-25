@@ -80,7 +80,7 @@ class ClearAndLoadDatabaseView(APIView):
 
         fields = list(FieldModel.objects.filter(bibleName='asv'))
         
-        ts = 12
+        ts = 1
         if ts > len(fields):
             ts = len(fields)/2
                 
@@ -91,7 +91,6 @@ class ClearAndLoadDatabaseView(APIView):
             t = threading.Thread(target=worker2, args=(fields[i*chunk:j*chunk],))
             t.daemon = True  
             threads.append(t)
-            time.sleep(2)
             t.start()
             
         print(str(ts) + " threads processing")
