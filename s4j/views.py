@@ -54,7 +54,7 @@ class ClearAndLoadDatabaseView(APIView):
         print("opening .json")
         bookKey  = open("json/key_english.json").read()
         genreKey  = open("json/key_genre_english.json").read()
-        bible = open("json/tb.json").read()
+        bible = open("json/asv.json").read()
         
         print("processing genre")
         data = self.c2j(genreKey)
@@ -91,6 +91,7 @@ class ClearAndLoadDatabaseView(APIView):
             t = threading.Thread(target=worker2, args=(fields[i*chunk:j*chunk],))
             t.daemon = True  
             threads.append(t)
+            time.sleep(2)
             t.start()
             
         print(str(ts) + " threads processing")
