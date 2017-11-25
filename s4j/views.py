@@ -80,7 +80,7 @@ class ClearAndLoadDatabaseView(APIView):
         fields = list(FieldModel.objects.filter(bibleName='asv'))
         count = len(fields)
         
-        ts = 10
+        ts = 12
         if ts > len(fields):
             ts = len(fields)/2
                 
