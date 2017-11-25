@@ -141,7 +141,7 @@ class PrayerView(APIView):
             
             print("Processing " + str(len(theBible)) + " answers")
             
-            ts = 10
+            ts = 30
             if ts > len(theBible):
                 ts = len(theBible)/2
                 
