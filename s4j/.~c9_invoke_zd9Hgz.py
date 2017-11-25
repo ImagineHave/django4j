@@ -52,7 +52,7 @@ class ClearAndLoadDatabaseView(APIView):
         print("opening .json")
         bookKey  = open("json/key_english.json").read()
         genreKey  = open("json/key_genre_english.json").read()
-        bible = open("json/asv.json").read()
+        bible = open("json/.json").read()
         
         print("processing genre")
         data = self.c2j(genreKey)
