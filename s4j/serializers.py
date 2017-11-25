@@ -5,6 +5,7 @@ Created on 26 Aug 2017
 '''
 from rest_framework import serializers
 from s4j.models import PrayerModel, FieldModel, GenreModel, BookModel, BibleModel, AnswerModel
+import threading, logging
 
 class FieldSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,16 +30,37 @@ class BibleSerializer(serializers.Serializer):
         bibleName = validated_data.pop('bibleName')
         rows = resultset_data.pop('row')
         print("bible: " + bibleName)
-        j = 0
-        for orderedDictionaryField in rows:
-            listing = orderedDictionaryField.pop('field')
-            mapping = {'book':listing[1], 'chapter':listing[2], 'verse':listing[3], 'passage':listing[4], 'bibleName':bibleName}
-            FieldModel.objects.create(**mapping)
-            if(j != int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)):
-                j = int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)
-                print("Progress : " + str(int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)) + "%")
+        
+        ts = 30
+        if ts > len(rows):
+            ts = len(rows)/2
+                
+        chunk = len(rows)/ts
+        threads = []
+        for i in range(ts):
+            j = i + 1
+            t = threading.Thread(target=worker, args=(rows[i*chunk:j*chunk], bibleName,))
+            t.daemon = True  
+            threads.append(t)
+            t.start()
+            
+        print(str(ts) + " threads processing")
+            
+        for t in threads:
+            t.join()   
+        
         print(bibleName + " completed")
         return BibleModel.objects.create(**validated_data)
+        
+def worker(rows, bibleName):
+    j = 0
+    for orderedDictionaryField in rows:
+        listing = orderedDictionaryField.pop('field')
+        mapping = {'book':listing[1], 'chapter':listing[2], 'verse':listing[3], 'passage':listing[4], 'bibleName':bibleName}
+        FieldModel.objects.create(**mapping)
+        if(j != int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)):
+            j = int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)
+            logging.debug("Progress : " + str(int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)) + "%")    
             
 class PrayerSerializer(serializers.ModelSerializer):
     class Meta:
