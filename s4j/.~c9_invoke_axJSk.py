@@ -220,7 +220,7 @@ class BestMatch():
         else:
             self.bestMatch = max([self.bestMatch, bestMatch], key=lambda item: cosine_sim(stemmed, item.processed))
             
-def worker2(fields):
+def worker2(selffields):
     i = float(0)
     j = 0
     for f in fields:
