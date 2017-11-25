@@ -75,10 +75,60 @@ class ClearAndLoadDatabaseView(APIView):
             print(s.errors)
             
         print("now loading up answers")
-        count = FieldModel.objects.filter(bibleName='asv').count()
+        
+        fields = list(FieldModel.objects.filter(bibleName='asv'))
+        count = len(fields)
+        
+        ts = 30
+        if ts > len(fields):
+            ts = len(fields)/2
+                
+        chunk = len(fields)/ts
+        
+        for i in range(ts):
+            j = i + 1
+            t = threading.Thread(target=worker, args=(fields[i*chunk:j*chunk],))
+            t.daemon = True  
+            threads.append(t)
+            t.start()
+            
+        print(str(ts) + " threads processing")
+            
+        for t in threads:
+            t.join()   
+            
+        
+    #convert to json
+    def c2j(self, input):
+        return JSONParser().parse(BytesIO(input))
+        
+    def get(self, request, format=None):
+        print("get")
+        return Response("k", status=status.HTTP_200_OK)
+
+    def deleteObjects(self, objects):
+        for r in objects.all():
+            r.delete()     
+        
+    def stemSentence(self, text):
+        stemmer = nltk.stem.porter.PorterStemmer()
+        stemmedSentence = ""
+        for word in text:
+            stemmedSentence = stemmedSentence + " " + stemmer.stem(word)
+        return stemmedSentence
+	
+    '''remove punctuation, lowercase, stem'''
+    def processWords(self, text):
+        remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
+        text = text.lower().translate(remove_punctuation_map)
+        filtered_words = [word for word in text.split() if word not in stopwords.words('english')]
+        return self.stemSentence(filtered_words)
+        
+    def worker(self, fields):
+        
         i = float(0)
         j = 0
-        for f in FieldModel.objects.filter(bibleName='asv'):
+        for f in fields:
             bookNumber = f.book
             chapter = f.chapter
             verse = f.verse
@@ -108,33 +158,6 @@ class ClearAndLoadDatabaseView(APIView):
                 j = int(float(i)/float(count)*100)
                 
             i = i + 1
-            
-        
-    #convert to json
-    def c2j(self, input):
-        return JSONParser().parse(BytesIO(input))
-        
-    def get(self, request, format=None):
-        print("get")
-        return Response("k", status=status.HTTP_200_OK)
-
-    def deleteObjects(self, objects):
-        for r in objects.all():
-            r.delete()     
-        
-    def stemSentence(self, text):
-        stemmer = nltk.stem.porter.PorterStemmer()
-        stemmedSentence = ""
-        for word in text:
-            stemmedSentence = stemmedSentence + " " + stemmer.stem(word)
-        return stemmedSentence
-	
-    '''remove punctuation, lowercase, stem'''
-    def processWords(self, text):
-        remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
-        text = text.lower().translate(remove_punctuation_map)
-        filtered_words = [word for word in text.split() if word not in stopwords.words('english')]
-        return self.stemSentence(filtered_words)
     
 class PrayerView(APIView):
     
