@@ -91,6 +91,7 @@ class ClearAndLoadDatabaseView(APIView):
             t = threading.Thread(target=worker2, args=(fields[i*chunk:j*chunk],))
             t.daemon = True  
             threads.append(t)
+            time.sleep(2)
             t.start()
             
         print(str(ts) + " threads processing")
