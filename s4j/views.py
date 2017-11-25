@@ -79,7 +79,7 @@ class ClearAndLoadDatabaseView(APIView):
         fields = list(FieldModel.objects.filter(bibleName='asv'))
         count = len(fields)
         
-        ts = 30
+        ts = 10
         if ts > len(fields):
             ts = len(fields)/2
                 
@@ -139,7 +139,7 @@ class PrayerView(APIView):
             
             print("Processing " + str(len(theBible)) + " answers")
             
-            ts = 30
+            ts = 10
             if ts > len(theBible):
                 ts = len(theBible)/2
                 
