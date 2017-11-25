@@ -48,6 +48,7 @@ class ClearAndLoadDatabaseView(APIView):
         print("Book model clear")
         self.deleteObjects(WordModel.objects)
         print("Word model clear")
+
         
     def load(self):
         print("opening .json")
@@ -78,7 +79,6 @@ class ClearAndLoadDatabaseView(APIView):
         print("now loading up answers")
 
         fields = list(FieldModel.objects.filter(bibleName='asv'))
-        count = len(fields)
         
         ts = 12
         if ts > len(fields):
@@ -96,8 +96,8 @@ class ClearAndLoadDatabaseView(APIView):
         print(str(ts) + " threads processing")
             
         for t in threads:
-            t.join()   
-        
+            t.join() 
+            
     #convert to json
     def c2j(self, input):
         return JSONParser().parse(BytesIO(input))
@@ -125,18 +125,11 @@ class PrayerView(APIView):
             answers = []
             
             for word in tokenize(stemmed):
-                words = words + (list(WordModel.objects.filter(word=word)))
-            
-            for word in words:
-                answers = answers + list(word.answers.all())
-            
-            #theBible = list(AnswerModel.objects.all())
-            #stemmed = self.process(request.data.get("prayer"))
-            #bestMatch = max(theBible, key=lambda item: self.cosine_sim(stemmed, item.processed))
+                answers = answers + (list(AnswerModel.objects.filter(word=word)))
             
             theBible = list(set(answers))
             if len(theBible) == 0:
-                theBible = list(AnswerModel.objects.all())
+                theBible = list(Answers.objects.all())
                 print("had to revert to whole bible")
             
             print("Processing " + str(len(theBible)) + " answers")
@@ -229,12 +222,22 @@ def worker2(fields):
         
         mapping = {'genre':genre, 'genreNumber':genreNumber, 'book':book, 'bookNumber':bookNumber, 'chapter':f.chapter, 'verse':f.verse, 'passage':passage, 'processed':processed}
         
-        answer = AnswerModel.objects.create(**mapping)
+        #answer = AnswerModel.objects.create(**mapping)
 
         for word in tokenize(processed):
-            wordModel = WordModel(word=word)
-            wordModel.save()
-            wordModel.answers.add(answer)
+            words = WordModel(word=word)
+            words.save()
+            #for answer in list(WordModel.answers.all()):
+            answer = AnswerModel.objects.create(
+                genre = genre,
+                genreNumber = genreNumber,
+                book = book,
+                bookNumber = bookNumber,
+                chapter = f.chapter,
+                verse = f.verse,
+                passage = passage,
+                processed = processed,
+                word = words)
         
         if (j != int(float(i)/float(len(fields))*100)):
             logging.debug("Progress: " + str(j) + "%")

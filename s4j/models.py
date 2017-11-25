@@ -31,7 +31,10 @@ class BookModel(models.Model):
     book = models.TextField()
     bookNumber = models.IntegerField()
     genreNumber = models.IntegerField()
-    
+
+class WordModel(models.Model):
+    word = models.TextField(primary_key=True)
+
 class AnswerModel(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     genre = models.TextField()
@@ -42,15 +45,11 @@ class AnswerModel(models.Model):
     verse = models.IntegerField()
     passage = models.TextField()
     processed = models.TextField()
+    word = models.ForeignKey(WordModel,)
     
-    def __str__(self):              # __unicode__ on Python 2
+    def __str__(self): 
         return self.passage
     
 class BibleModel(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     name = models.TextField()
-    
-class WordModel(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    word = models.TextField()
-    answers = models.ManyToManyField(AnswerModel)
