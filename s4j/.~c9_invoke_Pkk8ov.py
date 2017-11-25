@@ -228,7 +228,7 @@ def worker2(fields):
         for word in tokenize(processed):
             
             if WordModel.objects.filter(word=word).exists():
-                wordModel = WordModel.objects.filter(word=word).first()
+                wordModel = WordModel.objects.filter(word=wordModel.rd).first()
             else:
                 wordModel = WordModel(word=word)
                 wordModel.save()
