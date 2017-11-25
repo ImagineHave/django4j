@@ -52,7 +52,7 @@ class ClearAndLoadDatabaseView(APIView):
         print("opening .json")
         bookKey  = open("json/key_english.json").read()
         genreKey  = open("json/key_genre_english.json").read()
-        bible = open("json/asv.json").read()
+        bible = open("json/tb.json").read()
         
         print("processing genre")
         data = self.c2j(genreKey)
@@ -108,20 +108,6 @@ class ClearAndLoadDatabaseView(APIView):
     def deleteObjects(self, objects):
         for r in objects.all():
             r.delete()     
-        
-    def stemSentence(self, text):
-        stemmer = nltk.stem.porter.PorterStemmer()
-        stemmedSentence = ""
-        for word in text:
-            stemmedSentence = stemmedSentence + " " + stemmer.stem(word)
-        return stemmedSentence
-	
-    '''remove punctuation, lowercase, stem'''
-    def processWords(self, text):
-        remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
-        text = text.lower().translate(remove_punctuation_map)
-        filtered_words = [word for word in text.split() if word not in stopwords.words('english')]
-        return self.stemSentence(filtered_words)
     
 class PrayerView(APIView):
     
@@ -131,7 +117,7 @@ class PrayerView(APIView):
         if serializer.is_valid():
             serializer.save()
             print("prayer saved: " + request.data.get("prayer"))
-            stemmed = self.processWords(request.data.get("prayer"))
+            stemmed = processWords(request.data.get("prayer"))
             
             words = []
             answers = []
@@ -179,19 +165,19 @@ class PrayerView(APIView):
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
-    def stemSentence(self, text):
-        stemmer = nltk.stem.porter.PorterStemmer()
-        stemmedSentence = ""
-        for word in text:
-            stemmedSentence = stemmedSentence + " " + stemmer.stem(word)
-        return stemmedSentence
-	
-    '''remove punctuation, lowercase, stem'''
-    def processWords(self, text):
-        remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
-        text = text.lower().translate(remove_punctuation_map)
-        filtered_words = [word for word in text.split() if word not in stopwords.words('english')]
-        return self.stemSentence(filtered_words)
+def stemSentence(text):
+    stemmer = nltk.stem.porter.PorterStemmer()
+    stemmedSentence = ""
+    for word in text:
+        stemmedSentence = stemmedSentence + " " + stemmer.stem(word)
+    return stemmedSentence
+
+'''remove punctuation, lowercase, stem'''
+def processWords(text):
+    remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
+    text = text.lower().translate(remove_punctuation_map)
+    filtered_words = [word for word in text.split() if word not in stopwords.words('english')]
+    return stemSentence(filtered_words)
     	
 def cosine_sim(text1, text2):
     vectorizer = TfidfVectorizer(norm='l2',min_df=1, use_idf=True, smooth_idf=False, sublinear_tf=True, tokenizer=tokenize, stop_words='english')
@@ -237,7 +223,7 @@ def worker2(fields):
         genreNumber = g.genreNumber
         
         bible = FieldModel.objects.filter(bibleName='asv', book=bookNumber, chapter=chapter, verse=verse, passage=passage).first()
-        processed = self.processWords(bible.passage)
+        processed = processWords(bible.passage)
         
         mapping = {'genre':genre, 'genreNumber':genreNumber, 'book':book, 'bookNumber':bookNumber, 'chapter':f.chapter, 'verse':f.verse, 'passage':passage, 'processed':processed}
         
@@ -248,8 +234,8 @@ def worker2(fields):
             wordModel.save()
             wordModel.answers.add(answer)
         
-        if (j != int(float(i)/float(count)*100)):
+        if (j != int(float(i)/float(len(fields))*100)):
             print("Progress: " + str(j) + "%")
-            j = int(float(i)/float(count)*100)
+            j = int(float(i)/float(len(fields))*100)
             
         i = i + 1
