@@ -84,7 +84,7 @@ class ClearAndLoadDatabaseView(APIView):
             ts = len(fields)/2
                 
         chunk = len(fields)/ts
-        
+        threads = []
         for i in range(ts):
             j = i + 1
             t = threading.Thread(target=worker, args=(fields[i*chunk:j*chunk],))
