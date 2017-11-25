@@ -245,8 +245,9 @@ def worker2(fields):
                 processed = processed,
                 word = wordModel)
         
+        i = i + 1
+        
         if (j != int(float(i)/float(len(fields))*100)):
             logging.debug("Progress: " + str(j) + "%")
             j = int(float(i)/float(len(fields))*100)
             
-        i = i + 1
