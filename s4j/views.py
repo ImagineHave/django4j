@@ -87,7 +87,7 @@ class ClearAndLoadDatabaseView(APIView):
         threads = []
         for i in range(ts):
             j = i + 1
-            t = threading.Thread(target=worker, args=(fields[i*chunk:j*chunk],))
+            t = threading.Thread(target=worker2, args=(fields[i*chunk:j*chunk],))
             t.daemon = True  
             threads.append(t)
             t.start()
@@ -122,40 +122,6 @@ class ClearAndLoadDatabaseView(APIView):
         text = text.lower().translate(remove_punctuation_map)
         filtered_words = [word for word in text.split() if word not in stopwords.words('english')]
         return self.stemSentence(filtered_words)
-        
-    def worker(self, fields):
-        i = float(0)
-        j = 0
-        for f in fields:
-            bookNumber = f.book
-            chapter = f.chapter
-            verse = f.verse
-            passage = f.passage
-            bibleName = f.bibleName
-            
-            b = BookModel.objects.filter(bookNumber=bookNumber).first()
-            book = b.book
-            g = GenreModel.objects.filter(genreNumber = b.genreNumber).first()
-            genre = g.genre
-            genreNumber = g.genreNumber
-            
-            bible = FieldModel.objects.filter(bibleName='asv', book=bookNumber, chapter=chapter, verse=verse, passage=passage).first()
-            processed = self.processWords(bible.passage)
-            
-            mapping = {'genre':genre, 'genreNumber':genreNumber, 'book':book, 'bookNumber':bookNumber, 'chapter':f.chapter, 'verse':f.verse, 'passage':passage, 'processed':processed}
-            
-            answer = AnswerModel.objects.create(**mapping)
-
-            for word in tokenize(processed):
-                wordModel = WordModel(word=word)
-                wordModel.save()
-                wordModel.answers.add(answer)
-            
-            if (j != int(float(i)/float(count)*100)):
-                print("Progress: " + str(j) + "%")
-                j = int(float(i)/float(count)*100)
-                
-            i = i + 1
     
 class PrayerView(APIView):
     
@@ -253,3 +219,37 @@ class BestMatch():
             self.bestMatch = bestMatch
         else:
             self.bestMatch = max([self.bestMatch, bestMatch], key=lambda item: cosine_sim(stemmed, item.processed))
+            
+def worker2(self, fields):
+    i = float(0)
+    j = 0
+    for f in fields:
+        bookNumber = f.book
+        chapter = f.chapter
+        verse = f.verse
+        passage = f.passage
+        bibleName = f.bibleName
+        
+        b = BookModel.objects.filter(bookNumber=bookNumber).first()
+        book = b.book
+        g = GenreModel.objects.filter(genreNumber = b.genreNumber).first()
+        genre = g.genre
+        genreNumber = g.genreNumber
+        
+        bible = FieldModel.objects.filter(bibleName='asv', book=bookNumber, chapter=chapter, verse=verse, passage=passage).first()
+        processed = self.processWords(bible.passage)
+        
+        mapping = {'genre':genre, 'genreNumber':genreNumber, 'book':book, 'bookNumber':bookNumber, 'chapter':f.chapter, 'verse':f.verse, 'passage':passage, 'processed':processed}
+        
+        answer = AnswerModel.objects.create(**mapping)
+
+        for word in tokenize(processed):
+            wordModel = WordModel(word=word)
+            wordModel.save()
+            wordModel.answers.add(answer)
+        
+        if (j != int(float(i)/float(count)*100)):
+            print("Progress: " + str(j) + "%")
+            j = int(float(i)/float(count)*100)
+            
+        i = i + 1
