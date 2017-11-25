@@ -225,8 +225,14 @@ def worker2(fields):
         #answer = AnswerModel.objects.create(**mapping)
 
         for word in tokenize(processed):
-            words = WordModel(word=word)
-            words.save()
+            
+            if WordModel.objects.filter(word=word).exists():
+                wordModel = WordModel.objects.filter(word=wordModel.word).first()
+            else:
+                wordModel = WordModel(word=word)
+                wordModel.save()
+            
+            
             #for answer in list(WordModel.answers.all()):
             answer = AnswerModel.objects.create(
                 genre = genre,
@@ -237,7 +243,7 @@ def worker2(fields):
                 verse = f.verse,
                 passage = passage,
                 processed = processed,
-                word = words)
+                word = wordModel)
         
         if (j != int(float(i)/float(len(fields))*100)):
             logging.debug("Progress: " + str(j) + "%")
