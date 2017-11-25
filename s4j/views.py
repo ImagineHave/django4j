@@ -108,20 +108,6 @@ class ClearAndLoadDatabaseView(APIView):
     def deleteObjects(self, objects):
         for r in objects.all():
             r.delete()     
-        
-    def stemSentence(self, text):
-        stemmer = nltk.stem.porter.PorterStemmer()
-        stemmedSentence = ""
-        for word in text:
-            stemmedSentence = stemmedSentence + " " + stemmer.stem(word)
-        return stemmedSentence
-	
-    '''remove punctuation, lowercase, stem'''
-    def processWords(self, text):
-        remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
-        text = text.lower().translate(remove_punctuation_map)
-        filtered_words = [word for word in text.split() if word not in stopwords.words('english')]
-        return self.stemSentence(filtered_words)
     
 class PrayerView(APIView):
     
@@ -131,7 +117,7 @@ class PrayerView(APIView):
         if serializer.is_valid():
             serializer.save()
             print("prayer saved: " + request.data.get("prayer"))
-            stemmed = self.processWords(request.data.get("prayer"))
+            stemmed = processWords(request.data.get("prayer"))
             
             words = []
             answers = []
@@ -178,20 +164,6 @@ class PrayerView(APIView):
         else:
             print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            
-    def stemSentence(self, text):
-        stemmer = nltk.stem.porter.PorterStemmer()
-        stemmedSentence = ""
-        for word in text:
-            stemmedSentence = stemmedSentence + " " + stemmer.stem(word)
-        return stemmedSentence
-	
-    '''remove punctuation, lowercase, stem'''
-    def processWords(self, text):
-        remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
-        text = text.lower().translate(remove_punctuation_map)
-        filtered_words = [word for word in text.split() if word not in stopwords.words('english')]
-        return self.stemSentence(filtered_words)
     	
 def cosine_sim(text1, text2):
     vectorizer = TfidfVectorizer(norm='l2',min_df=1, use_idf=True, smooth_idf=False, sublinear_tf=True, tokenizer=tokenize, stop_words='english')
@@ -253,3 +225,17 @@ def worker2(fields):
             j = int(float(i)/float(count)*100)
             
         i = i + 1
+        
+    def stemSentence(text):
+        stemmer = nltk.stem.porter.PorterStemmer()
+        stemmedSentence = ""
+        for word in text:
+            stemmedSentence = stemmedSentence + " " + stemmer.stem(word)
+        return stemmedSentence
+	
+    '''remove punctuation, lowercase, stem'''
+    def processWords(text):
+        remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
+        text = text.lower().translate(remove_punctuation_map)
+        filtered_words = [word for word in text.split() if word not in stopwords.words('english')]
+        return stemSentence(filtered_words)
