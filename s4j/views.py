@@ -75,7 +75,7 @@ class ClearAndLoadDatabaseView(APIView):
             print(s.errors)
             
         print("now loading up answers")
-        
+
         fields = list(FieldModel.objects.filter(bibleName='asv'))
         count = len(fields)
         
@@ -96,7 +96,6 @@ class ClearAndLoadDatabaseView(APIView):
             
         for t in threads:
             t.join()   
-            
         
     #convert to json
     def c2j(self, input):
@@ -125,7 +124,10 @@ class ClearAndLoadDatabaseView(APIView):
         return self.stemSentence(filtered_words)
         
     def worker(self, fields):
+<<<<<<< HEAD
         
+=======
+>>>>>>> dev
         i = float(0)
         j = 0
         for f in fields:
