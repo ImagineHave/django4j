@@ -135,7 +135,7 @@ class PrayerView(APIView):
             
             print("Processing " + str(len(theBible)) + " answers")
             
-            ts = 30
+            ts = 10
             if ts > len(theBible):
                 ts = len(theBible)/2
                 
@@ -228,7 +228,7 @@ def worker2(fields):
         for word in tokenize(processed):
             
             if WordModel.objects.filter(word=word).exists():
-                wordModel = WordModel.objects.filter(word=word).first()
+                wordModel = WordModel.objects.filter(word=wordModel.rd).first()
             else:
                 wordModel = WordModel(word=word)
                 wordModel.save()
