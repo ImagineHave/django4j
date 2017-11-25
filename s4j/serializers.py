@@ -5,7 +5,7 @@ Created on 26 Aug 2017
 '''
 from rest_framework import serializers
 from s4j.models import PrayerModel, FieldModel, GenreModel, BookModel, BibleModel, AnswerModel
-import threading
+import threading, logging
 
 class FieldSerializer(serializers.ModelSerializer):
     class Meta:
@@ -60,7 +60,7 @@ def worker(rows, bibleName):
         FieldModel.objects.create(**mapping)
         if(j != int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)):
             j = int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)
-            print("Progress : " + str(int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)) + "%")    
+            logging.debug("Progress : " + str(int(float(FieldModel.objects.all().count())/float(len(rows)) * 100)) + "%")    
             
 class PrayerSerializer(serializers.ModelSerializer):
     class Meta:

@@ -235,7 +235,7 @@ def worker2(fields):
             wordModel.answers.add(answer)
         
         if (j != int(float(i)/float(len(fields))*100)):
-            print("Progress: " + str(j) + "%")
+            logging.debug("Progress: " + str(j) + "%")
             j = int(float(i)/float(len(fields))*100)
             
         i = i + 1
