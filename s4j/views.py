@@ -9,7 +9,7 @@ from s4j import models
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from s4j.models import FieldModel, GenreModel, BookModel, AnswerModel, WordModel
+from s4j.models import FieldModel, GenreModel, BookModel, AnswerModel, WordModel, PrayerModel
 from random import randint
 from sklearn.feature_extraction.text import TfidfVectorizer
 from django.utils.six import BytesIO
@@ -54,7 +54,7 @@ class ClearAndLoadDatabaseView(APIView):
         print("opening .json")
         bookKey  = open("json/key_english.json").read()
         genreKey  = open("json/key_genre_english.json").read()
-        bible = open("json/asv.json").read()
+        bible = open("json/tb.json").read()
         
         print("processing genre")
         data = self.c2j(genreKey)
@@ -117,8 +117,16 @@ class PrayerView(APIView):
         print("prayer request")
         serializer = serializers.PrayerSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            print("prayer saved: " + request.data.get("prayer"))
+            print("prayer: " + request.data.get("prayer"))
+            
+            if PrayerModel.objects.filter(prayer=request.data.get("prayer")).exists():
+                bestMatch = PrayerModel.objects.filter(prayer=request.data.get("prayer")).first().answer
+                serializer = serializers.AnswerSerializer(bestMatch)
+                print("Already saved")
+                gc.enable()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            
+            
             stemmed = processWords(request.data.get("prayer"))
             
             words = []
@@ -128,12 +136,28 @@ class PrayerView(APIView):
                 answers = answers + (list(set(AnswerModel.objects.filter(word=word))))
             
             if len(answers) == 0:
-                answers = list(Answers.objects.all())
+                answers = list(AnswerModel.objects.all())
                 print("had to revert to whole bible")
+                
+            print("Processing " + str(len(answers)) + " answers")
+            
+            ranked = []
+            for answer in answers:
+                ranked.append(RankAnswer(stemmed, answer))
+                
+            ranked.sort(key=lambda x: x.rank, reverse=True)
+            
+            #get top 1000
+            ranked = ranked[0:1000]
+            
+            answers = []
+            for rank in ranked:
+                answer = rank.getAnswer()
+                answers.append(answer)
             
             print("Processing " + str(len(answers)) + " answers")
             
-            ts = 30
+            ts = 10
             if ts > len(answers):
                 ts = len(answers)/2
                 
@@ -154,6 +178,7 @@ class PrayerView(APIView):
             
             serializer = serializers.AnswerSerializer(bestMatch.bestMatch)
             print(serializer.data)
+            PrayerModel.objects.create(prayer=request.data.get("prayer"), answer=bestMatch.bestMatch)
             gc.enable()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
@@ -202,6 +227,39 @@ class BestMatch():
         else:
             self.bestMatch = max([self.bestMatch, bestMatch], key=lambda item: cosine_sim(stemmed, item.processed))
             
+class RankAnswer():
+    
+    def __init__(self, prayer, answer):
+        tokened = tokenize(prayer)
+        self.answer = answer
+        processed = tokenize(answer.processed)
+        dict = {}
+        count = {}
+        self.rank = 0.0
+        
+        for x in processed:
+            dict[x]=0.0
+            count[x]=0
+            
+        for x in tokened:
+            if x in dict:
+                if(count[x] == 0):
+                    dict[x] = 1
+                    count[x] = 1
+                else:
+                    count[x] += 1
+                    dict[x] += 1 ** (1/count[x])
+                    
+
+        for x in processed:
+            self.rank += dict[x]
+        
+    def __str__(self): 
+        return self.answer.passage
+        
+    def getAnswer(self):
+        return self.answer
+            
 def worker2(fields):
     i = float(0)
     j = 0
@@ -219,12 +277,9 @@ def worker2(fields):
         genreNumber = g.genreNumber
         
         bible = FieldModel.objects.filter(bibleName='asv', book=bookNumber, chapter=chapter, verse=verse, passage=passage).first()
-        processed = processWords(bible.passage)
         
-        mapping = {'genre':genre, 'genreNumber':genreNumber, 'book':book, 'bookNumber':bookNumber, 'chapter':f.chapter, 'verse':f.verse, 'passage':passage, 'processed':processed}
+        processed = " ".join(set(processWords(bible.passage).split()))
         
-        #answer = AnswerModel.objects.create(**mapping)
-
         for word in tokenize(processed):
             
             if WordModel.objects.filter(word=word).exists():
