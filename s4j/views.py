@@ -179,9 +179,10 @@ class PrayerView(APIView):
             for t in threads:
                 t.join()
             
-            serializer = serializers.AnswerSerializer(bestMatch.bestMatch)
+            prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), answer=bestMatch.bestMatch)
+            serializer = serializers.PrayerSerializer(prayerModel)
             print(serializer.data)
-            PrayerModel.objects.create(prayer=request.data.get("prayer"), answer=bestMatch.bestMatch)
+
             gc.enable()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:

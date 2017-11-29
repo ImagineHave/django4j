@@ -65,9 +65,10 @@ def worker(rows, bibleName):
         i = i + 1
             
 class PrayerSerializer(serializers.ModelSerializer):
+    answer = AnswerSerializer(read_only=True)
     class Meta:
         model = PrayerModel
-        fields = ('id', 'prayer')
+        fields = ('id', 'prayer', 'answer')
         
 class GenreSerializer(serializers.ModelSerializer):
     n = serializers.CharField(source='genre')
