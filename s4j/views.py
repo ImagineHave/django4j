@@ -120,8 +120,8 @@ class PrayerView(APIView):
             print("prayer: " + request.data.get("prayer"))
             
             if PrayerModel.objects.filter(prayer=request.data.get("prayer")).exists():
-                bestMatch = PrayerModel.objects.filter(prayer=request.data.get("prayer")).first().answer
-                serializer = serializers.AnswerSerializer(bestMatch)
+                prayerModel = PrayerModel.objects.filter(prayer=request.data.get("prayer")).first()
+                serializer = serializers.PrayerSerializer(prayerModel)
                 print("Already saved")
                 gc.enable()
                 return Response(serializer.data, status=status.HTTP_200_OK)
