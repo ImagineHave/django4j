@@ -3,7 +3,7 @@ Created on 26 Aug 2017
 
 @author: Christopher Williams
 '''
-import nltk, string, threading, gc, ast, logging, time
+import nltk, string, threading, gc, ast, logging, time, random
 from s4j import serializers
 from s4j import models
 from rest_framework.views import APIView
@@ -136,8 +136,13 @@ class PrayerView(APIView):
                 answers = answers + (list(set(AnswerModel.objects.filter(word=word))))
             
             if len(answers) == 0:
+                print("Returning random answer")
                 answers = list(AnswerModel.objects.all())
-                print("had to revert to whole bible")
+                randomAnswer = random.choice(answers)
+                prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), answer=randomAnswer)
+                serializer = serializers.PrayerSerializer(prayerModel)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+                
                 
             print("Processing " + str(len(answers)) + " answers")
             
