@@ -3,6 +3,10 @@ from models import *
 from django.db import connection
 from s4j.tools import *
 
+logging.basicConfig(level=logging.DEBUG,
+                    format='(%(threadName)-10s) %(message)s',
+                    )
+
 class BibleLoader():
     
     def process(self):
