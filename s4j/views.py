@@ -161,6 +161,8 @@ class PrayerView(APIView):
                 answers.append(answer)
             
             print("Processing " + str(len(answers)) + " answers")
+            serializer = serializers.AnswerSerializer(ranked[0].getAnswer())
+            return Response(serializer.data, status=status.HTTP_200_OK)
             
             ts = 10
             if len(answers) == 1:
@@ -291,24 +293,28 @@ def worker2(fields):
         
         for word in tokenize(processed):
             
+            wordModel = WordModel()
+            
             if WordModel.objects.filter(word=word).exists():
                 wordModel = WordModel.objects.filter(word=word).first()
             else:
                 wordModel = WordModel(word=word)
                 wordModel.save()
             
-            
-            #for answer in list(WordModel.answers.all()):
-            answer = AnswerModel.objects.create(
-                genre = genre,
-                genreNumber = genreNumber,
-                book = book,
-                bookNumber = bookNumber,
-                chapter = f.chapter,
-                verse = f.verse,
-                passage = passage,
-                processed = processed,
-                word = wordModel)
+            if AnswerModel.objects.filter(processed=processed).exists():
+                answer = AnswerModel.objects.filter(processed=processed).first()
+                wordModel.answermodel_set.add(answer)
+            else:    
+                answer = AnswerModel.objects.create(
+                    genre = genre,
+                    genreNumber = genreNumber,
+                    book = book,
+                    bookNumber = bookNumber,
+                    chapter = f.chapter,
+                    verse = f.verse,
+                    passage = passage,
+                    processed = processed,
+                    word = wordModel)
         
         i = i + 1
         
