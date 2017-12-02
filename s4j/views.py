@@ -331,15 +331,3 @@ def w2a(request):
         output += word.word + ":" + str(len(answers)) + '<br>'
     
     return HttpResponse(output)
-            
-def aas(request):
-    
-    output = ""
-    for answer in list(AnswerModel.objects.all()):
-        words = list(answer.words.all())
-        wordString = "" 
-        for word in words:
-            wordString += ", "+word.word
-        output += answer.passage + " : " + wordString + " <br>"
-    
-    return HttpResponse(output)
