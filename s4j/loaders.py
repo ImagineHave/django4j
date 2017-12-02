@@ -60,7 +60,9 @@ class BibleLoader():
         print("now loading up answers")
     
         fields = list(FieldModel.objects.filter(bibleName='asv'))
-        
+
+        i = float(0)
+        j = float(0)        
         for f in fields:
             bookNumber = f.book
             chapter = f.chapter
@@ -78,8 +80,6 @@ class BibleLoader():
             
             processed = " ".join(set(processWords(bible.passage).split()))
             
-            i = 0
-            j = 0
             for word in tokenize(processed):
                 
                 wordModel = WordModel()
