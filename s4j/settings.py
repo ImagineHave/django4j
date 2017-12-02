@@ -28,7 +28,7 @@ SECRET_KEY = '5qroh+@(g((idsj#!*7)kwnvwz42ex)2$v2a7@qfzd#+janef*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['s4j.herokuapp.com', 's4j.imagine-have.xyz', 'django4j-cwih.c9users.io']
+ALLOWED_HOSTS = ['s4j.herokuapp.com', 's4j.imagine-have.xyz', 'django4j-cwih.c9users.io', '86.145.213.222']
 
 
 # Application definition
