@@ -19,6 +19,8 @@ from s4j import views
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
+    url(r'^w2a/$', views.w2a, name='w2a'),
+    url(r'^aas/$', views.aas, name='aas'),
     url(r'^s4j/p/$', views.PrayerView.as_view()),
     url(r'^s4j/b/$', views.ClearAndLoadDatabaseView.as_view()),
     url(r'^admin/', admin.site.urls),

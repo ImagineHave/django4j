@@ -15,6 +15,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from django.utils.six import BytesIO
 from rest_framework.parsers import JSONParser
 from nltk.corpus import stopwords
+from django.http import HttpResponse
 
 
 class ClearAndLoadDatabaseView(APIView):
@@ -133,7 +134,7 @@ class PrayerView(APIView):
             answers = []
             
             for word in tokenize(stemmed):
-                answers = answers + (list(set(AnswerModel.objects.filter(word=word))))
+                answers = answers + (list(set(AnswerModel.objects.filter(words=word))))
             
             if len(answers) == 0:
                 print("Returning random answer")
@@ -297,14 +298,17 @@ def worker2(fields):
             
             if WordModel.objects.filter(word=word).exists():
                 wordModel = WordModel.objects.filter(word=word).first()
+                print("word exists : " + word + " " + str(wordModel.answers.count()))
             else:
                 wordModel = WordModel(word=word)
+                print("not word exists : " + word + " " + str(wordModel.answers.count()))
                 wordModel.save()
             
             if AnswerModel.objects.filter(processed=processed).exists():
                 answer = AnswerModel.objects.filter(processed=processed).first()
-                wordModel.answermodel_set.add(answer)
-            else:    
+                wordModel.answers.add(answer)
+                print("answer exists : " + word + " " + str(wordModel.answers.count()))
+            else:  
                 answer = AnswerModel.objects.create(
                     genre = genre,
                     genreNumber = genreNumber,
@@ -313,8 +317,9 @@ def worker2(fields):
                     chapter = f.chapter,
                     verse = f.verse,
                     passage = passage,
-                    processed = processed,
-                    word = wordModel)
+                    processed = processed)
+                wordModel.answers.add(answer)
+                print("not answer exists : " + word + " " + str(wordModel.answers.count()))
         
         i = i + 1
         
@@ -322,3 +327,19 @@ def worker2(fields):
             logging.debug("Progress: " + str(j) + "%")
             j = int(float(i)/float(len(fields))*100)
             
+def w2a(request):
+    
+    output = ""
+    for word in list(WordModel.objects.all()):
+        answers = list(AnswerModel.objects.filter(words=word))
+        output += word.word + ":" + str(len(answers)) + '<br>'
+    
+    return HttpResponse(output)
+            
+def aas(request):
+    
+    output = ""
+    for answer in list(AnswerModel.objects.all()):
+        output += answer.passage + " <br>"
+    
+    return HttpResponse(output)
