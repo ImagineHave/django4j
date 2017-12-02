@@ -20,7 +20,7 @@ class AnswerModel(models.Model):
     chapter = models.IntegerField()
     verse = models.IntegerField()
     passage = models.TextField()
-    processed = models.TextField()
+    processed = models.TextField(primary_key=True)
     word = models.ForeignKey(WordModel,)
     
     def __str__(self): 
