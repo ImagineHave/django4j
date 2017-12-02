@@ -35,7 +35,7 @@ class BibleLoader():
         print("opening .json")
         bookKey  = open("json/key_english.json").read()
         genreKey  = open("json/key_genre_english.json").read()
-        bible = open("json/asv.json").read()
+        bible = open("json/tb.json").read()
         
         print("processing genre")
         data = c2j(genreKey)
