@@ -21,7 +21,7 @@ class AnswerModel(models.Model):
     verse = models.IntegerField()
     passage = models.TextField()
     processed = models.TextField(primary_key=True)
-    word = models.ForeignKey(WordModel,)
+    words = models.ManyToManyField(WordModel, related_name='answers')
     
     def __str__(self): 
         return self.passage
