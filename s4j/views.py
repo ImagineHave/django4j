@@ -163,7 +163,7 @@ class PrayerView(APIView):
             
             print("Processing " + str(len(answers)) + " answers")
             serializer = serializers.AnswerSerializer(ranked[0].getAnswer())
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            #return Response(serializer.data, status=status.HTTP_200_OK)
             
             ts = 10
             if len(answers) == 1:
@@ -298,16 +298,13 @@ def worker2(fields):
             
             if WordModel.objects.filter(word=word).exists():
                 wordModel = WordModel.objects.filter(word=word).first()
-                print("word exists : " + word + " " + str(wordModel.answers.count()))
             else:
                 wordModel = WordModel(word=word)
-                print("not word exists : " + word + " " + str(wordModel.answers.count()))
                 wordModel.save()
             
             if AnswerModel.objects.filter(processed=processed).exists():
                 answer = AnswerModel.objects.filter(processed=processed).first()
                 wordModel.answers.add(answer)
-                print("answer exists : " + word + " " + str(wordModel.answers.count()))
             else:  
                 answer = AnswerModel.objects.create(
                     genre = genre,
@@ -319,7 +316,6 @@ def worker2(fields):
                     passage = passage,
                     processed = processed)
                 wordModel.answers.add(answer)
-                print("not answer exists : " + word + " " + str(wordModel.answers.count()))
         
         i = i + 1
         
@@ -340,6 +336,10 @@ def aas(request):
     
     output = ""
     for answer in list(AnswerModel.objects.all()):
-        output += answer.passage + " <br>"
+        words = list(answer.words.all())
+        wordString = "" 
+        for word in words:
+            wordString += ", "+word.word
+        output += answer.passage + " : " + wordString + " <br>"
     
     return HttpResponse(output)
