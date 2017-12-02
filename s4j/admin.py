@@ -15,7 +15,7 @@ def load(request):
     print "for fucks sake"
 
 class AnswerModelAdmin(admin.ModelAdmin):
-    list_display = ['bookNumber', 'chapter', 'verse', 'passage']
+    list_display = ['passage', 'bookNumber', 'chapter', 'verse'] 
     ordering = ['bookNumber', 'chapter', 'verse']
 
     def get_urls(self):
@@ -32,8 +32,6 @@ class AnswerModelAdmin(admin.ModelAdmin):
         thread.daemon = True                            # Daemonize thread
         thread.start()                                  # Start the execution
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-        
-    
 
 admin.site.register(AnswerModel, AnswerModelAdmin)
 admin.site.register(WordModel)
