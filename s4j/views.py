@@ -73,7 +73,7 @@ class PrayerView(APIView):
                 answers.append(answer)
             
             print("Processing " + str(len(answers)) + " answers")
-            serializer = serializers.AnswerSerializer(ranked[0].getAnswer())
+            serializer = AnswerSerializer(ranked[0].getAnswer())
             #return Response(serializer.data, status=status.HTTP_200_OK)
             
             ts = 10
@@ -99,7 +99,7 @@ class PrayerView(APIView):
                 t.join()
             
             prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), answer=bestMatch.bestMatch)
-            serializer = serializers.PrayerSerializer(prayerModel)
+            serializer = PrayerSerializer(prayerModel)
             print(serializer.data)
 
             gc.enable()

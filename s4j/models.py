@@ -11,6 +11,9 @@ class WordModel(models.Model):
     def __str__(self): 
         return self.word
         
+    class Meta:
+        ordering = ('created',)
+        
 class AnswerModel(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     genre = models.TextField()
