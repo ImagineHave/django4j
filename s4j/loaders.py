@@ -3,6 +3,10 @@ from models import *
 from django.db import connection
 from s4j.tools import *
 
+logging.basicConfig(level=logging.DEBUG,
+                    format='(%(threadName)-10s) %(message)s',
+                    )
+
 class BibleLoader():
     
     def process(self):
@@ -31,7 +35,7 @@ class BibleLoader():
         print("opening .json")
         bookKey  = open("json/key_english.json").read()
         genreKey  = open("json/key_genre_english.json").read()
-        bible = open("json/tb.json").read()
+        bible = open("json/asv.json").read()
         
         print("processing genre")
         data = c2j(genreKey)
