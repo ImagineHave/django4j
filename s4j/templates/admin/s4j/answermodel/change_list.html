@@ -1,0 +1,20 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls %}
+
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+
+{% block object-tools-items %}
+  <li>
+    <a href="/admin/s4j/answermodel/load/" class="addlink">
+      {% blocktrans %} Load the Bible into the database {% endblocktrans %}
+    </a>
+  </li>
+{% endblock %}
+

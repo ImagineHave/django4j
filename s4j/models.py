@@ -42,6 +42,9 @@ class FieldModel(models.Model):
     passage = models.TextField()
     bibleName = models.TextField(default="boo hoo I am not set")
     
+    def __str__(self): 
+        return self.passage
+    
 class GenreModel(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     genre = models.TextField()
