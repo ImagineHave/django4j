@@ -156,3 +156,4 @@ STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 MESSAGE_LEVEL = message_constants.SUCCESS
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
