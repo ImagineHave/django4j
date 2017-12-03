@@ -29,7 +29,8 @@ class PrayerView(APIView):
         print("prayer request")
         serializer = PrayerSerializer(data=request.data)
         if serializer.is_valid():
-            clean_prayer = request.data.get("prayer").decode('utf-8','ignore').encode("utf-8")
+            clean_prayer = request.data.get("prayer").encode('utf-8', 'ignore').decode('utf-8', 'ignore')
+            print(clean_prayer)
             print("prayer: " + clean_prayer)
             
             if PrayerModel.objects.filter(prayer=clean_prayer).exists():
