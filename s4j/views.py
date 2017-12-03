@@ -56,7 +56,6 @@ class PrayerView(APIView):
                         prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=x, answer=randomAnswer)
                 
                 prayerModel = PrayerModel.objects.filter(prayer=request.data.get("prayer"), rank=1).first()
-                answer = prayerModel.answers.first()
                 serializer = PrayerSerializer(prayerModel)
                 return Response(serializer.data, status=status.HTTP_200_OK)
               
