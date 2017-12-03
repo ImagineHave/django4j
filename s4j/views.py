@@ -46,21 +46,25 @@ class PrayerView(APIView):
             if len(answers) == 0:
                 print("No words in database returning random answer")
                 answers = list(AnswerModel.objects.all())
-                for x in range(1,100):
+                x = 0
+                while x <= 99:
                     randomAnswer = random.choice(answers)
-                    prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=x, answer=randomAnswer)
-                    #prayerModel.answers.add(randomAnswer)
+                    if PrayerModel.objects.filter(answer=randomAnswer).exists():
+                        pass
+                    else:
+                        prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=x, answer=randomAnswer)
+                        x += 1
                 
                 prayerModel = PrayerModel.objects.filter(prayer=request.data.get("prayer"), rank=1).first()
                 answer = prayerModel.answers.first()
                 serializer = PrayerSerializer(prayerModel)
                 return Response(serializer.data, status=status.HTTP_200_OK)
               
-            print("Processing non unique" + str(len(answers)) + " answers")  
+            print("Processing non unique " + str(len(answers)) + " answers")  
                 
             answers = list(set(answers))
                 
-            print("Processing unique" + str(len(answers)) + " answers")
+            print("Processing unique " + str(len(answers)) + " answers")
             
             ranked = []
             for answer in answers:
@@ -68,15 +72,19 @@ class PrayerView(APIView):
                 
             ranked.sort(key=lambda x: x.rank, reverse=True)
             
-            #get top 1000
-            ranked = ranked[0:99]
-            
-            answers = []
-            i = 1
-            for rank in ranked:
-                print(rank.getAnswer)
-                prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=i, answer=rank.getAnswer())
-                i+=1
+            #get top 100
+            x = len(ranked)
+            i = 0
+            p = 0
+            while i <= x && p <= 100:
+                rank = ranked[i]
+                if PrayerModel.objects.filter(amswer=rank.getAnswer()).exists():
+                    i+=1
+                else:
+                    prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=i, answer=rank.getAnswer())
+                    p+=1
+                    i+=1
+                
             
             prayerModel = PrayerModel.objects.filter(prayer=request.data.get("prayer"), rank=1).first()
             serializer = PrayerSerializer(prayerModel)
