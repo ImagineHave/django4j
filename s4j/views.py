@@ -47,13 +47,13 @@ class PrayerView(APIView):
                 print("No words in database returning random answer")
                 answers = list(AnswerModel.objects.all())
                 x = 0
-                while x < 99:
+                while x <= 99:
                     randomAnswer = random.choice(answers)
                     if PrayerModel.objects.filter(answer=randomAnswer).exists():
                         pass
                     else:
-                        x += 1
                         prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=x, answer=randomAnswer)
+                        x += 1
                 
                 prayerModel = PrayerModel.objects.filter(prayer=request.data.get("prayer"), rank=1).first()
                 answer = prayerModel.answers.first()
