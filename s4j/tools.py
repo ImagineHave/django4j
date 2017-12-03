@@ -26,3 +26,36 @@ def processWords(text):
     return stemSentence(filtered_words)
     
 tokenize = lambda doc: doc.split()
+
+class RankAnswer():
+    
+    def __init__(self, prayer, answer):
+        tokened = tokenize(prayer)
+        self.answer = answer
+        processed = tokenize(answer.processed)
+        dict = {}
+        count = {}
+        self.rank = 0.0
+        
+        for x in processed:
+            dict[x]=0.0
+            count[x]=0
+            
+        for x in tokened:
+            if x in dict:
+                if(count[x] == 0):
+                    dict[x] = 1
+                    count[x] = 1
+                else:
+                    count[x] += 1
+                    dict[x] += 1 ** (1/count[x])
+                    
+
+        for x in processed:
+            self.rank += dict[x]
+        
+    def __str__(self): 
+        return self.answer.passage
+        
+    def getAnswer(self):
+        return self.answer

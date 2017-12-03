@@ -13,6 +13,9 @@ from s4j.loaders import BibleLoader
 
 def load(request):
     print "for fucks sake"
+    
+class PrayerModelAdmin(admin.ModelAdmin):
+    list_display = ['prayer', 'rank']
 
 class AnswerModelAdmin(admin.ModelAdmin):
     list_display = ['passage', 'bookNumber', 'chapter', 'verse'] 
@@ -34,6 +37,6 @@ class AnswerModelAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 admin.site.register(AnswerModel, AnswerModelAdmin)
+admin.site.register(PrayerModel, PrayerModelAdmin)
 admin.site.register(WordModel)
-admin.site.register(PrayerModel)
 admin.site.register(FieldModel)

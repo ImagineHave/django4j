@@ -23,16 +23,18 @@ class AnswerModel(models.Model):
     processed = models.TextField(primary_key=True)
     words = models.ManyToManyField(WordModel, related_name='answers')
     
+    
     def __str__(self): 
         return self.passage
-    
+        
 class PrayerModel(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     prayer = models.TextField()
-    answer = models.OneToOneField(AnswerModel,)
+    rank = models.IntegerField()
+    answer = models.OneToOneField(AnswerModel, blank=True)
     
-    class Meta:
-        ordering = ('created',)
+    def __str__(self): 
+        return self.prayer
     
 class FieldModel(models.Model):
     created = models.DateTimeField(auto_now_add=True)
