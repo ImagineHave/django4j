@@ -52,8 +52,8 @@ class PrayerView(APIView):
                     if PrayerModel.objects.filter(answer=randomAnswer).exists():
                         pass
                     else:
-                        prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=x, answer=randomAnswer)
                         x += 1
+                        prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=x, answer=randomAnswer)
                 
                 prayerModel = PrayerModel.objects.filter(prayer=request.data.get("prayer"), rank=1).first()
                 answer = prayerModel.answers.first()
