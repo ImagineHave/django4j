@@ -72,7 +72,7 @@ class PrayerView(APIView):
             answers = []
             i = 1
             for rank in ranked:
-                print(rank.getAnswer())
+                #print(rank.getAnswer())
                 prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=i, answer=rank.getAnswer())
                 i+=1
             
