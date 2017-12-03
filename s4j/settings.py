@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 import dj_database_url
+import whitenoise
+from django.contrib.messages import constants as message_constants
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,7 +28,7 @@ SECRET_KEY = '5qroh+@(g((idsj#!*7)kwnvwz42ex)2$v2a7@qfzd#+janef*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['s4j.herokuapp.com', 's4j.imagine-have.xyz', 'django4j-cwih.c9users.io']
+ALLOWED_HOSTS = ['s4j.herokuapp.com', 's4j.imagine-have.xyz', 'django4j-cwih.c9users.io', '86.145.213.222']
 
 
 # Application definition
@@ -51,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 's4j.urls'
@@ -80,7 +83,6 @@ WSGI_APPLICATION = 's4j.wsgi.application'
 # heroku setup
 db_from_env = dj_database_url.config()
 DATABASES = { 'default': dj_database_url.config() }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -131,8 +133,25 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
 
 SECURE_SSL_REDIRECT = True
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.9/howto/static-files/
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
+STATIC_URL = '/static/'
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
+
+MESSAGE_LEVEL = message_constants.SUCCESS
+
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+

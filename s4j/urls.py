@@ -16,10 +16,12 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from s4j import views
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
+    url(r'^w2a/$', views.w2a, name='w2a'),
     url(r'^s4j/p/$', views.PrayerView.as_view()),
-    url(r'^s4j/b/$', views.BibleView.as_view()),
-    url(r'^s4j/b2/$', views.Bible2View.as_view()),
     url(r'^admin/', admin.site.urls),
 ]
+
+urlpatterns += staticfiles_urlpatterns()
