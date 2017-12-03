@@ -91,7 +91,7 @@ class PrayerView(APIView):
             gc.enable()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            orint(serializer.errors)
+            print(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             
 def w2a(request):
