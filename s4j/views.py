@@ -29,15 +29,16 @@ class PrayerView(APIView):
         print("prayer request")
         serializer = PrayerSerializer(data=request.data)
         if serializer.is_valid():
-            print("prayer: " + request.data.get("prayer"))
+            clean_prayer = request.data.get("prayer").decode('utf-8','ignore').encode("utf-8")
+            print("prayer: " + clean_prayer)
             
-            if PrayerModel.objects.filter(prayer=request.data.get("prayer")).exists():
-                prayerModel = PrayerModel.objects.filter(prayer=request.data.get("prayer"), rank=1).first()
+            if PrayerModel.objects.filter(prayer=clean_prayer).exists():
+                prayerModel = PrayerModel.objects.filter(prayer=clean_prayer, rank=1).first()
                 serializer = PrayerSerializer(prayerModel)
                 print("Already saved :")
                 return Response(serializer.data, status=status.HTTP_200_OK)
             
-            stemmed = processWords(request.data.get("prayer"))
+            stemmed = processWords(clean_prayer)
             answers = []
             
             for word in tokenize(stemmed):
@@ -53,9 +54,9 @@ class PrayerView(APIView):
                         pass
                     else:
                         x += 1
-                        prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=x, answer=randomAnswer)
+                        prayerModel = PrayerModel.objects.create(prayer=clean_prayer, rank=x, answer=randomAnswer)
                 
-                prayerModel = PrayerModel.objects.filter(prayer=request.data.get("prayer"), rank=1).first()
+                prayerModel = PrayerModel.objects.filter(prayer=clean_prayer, rank=1).first()
                 serializer = PrayerSerializer(prayerModel)
                 return Response(serializer.data, status=status.HTTP_200_OK)
               
@@ -81,11 +82,11 @@ class PrayerView(APIView):
                     i+=1
                 else:
                     i+=1
-                    prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=i, answer=rank.getAnswer())
+                    prayerModel = PrayerModel.objects.create(prayer=clean_prayer, rank=i, answer=rank.getAnswer())
                     p+=1
                 
             
-            prayerModel = PrayerModel.objects.filter(prayer=request.data.get("prayer"), rank=1).first()
+            prayerModel = PrayerModel.objects.filter(prayer=clean_prayer, rank=1).first()
             serializer = PrayerSerializer(prayerModel)
             gc.enable()
             return Response(serializer.data, status=status.HTTP_200_OK)
