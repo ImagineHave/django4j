@@ -24,6 +24,7 @@ logging.basicConfig(level=logging.DEBUG,
 class PrayerView(APIView):
     
     def post(self, request, format=None):
+        nltk.download('stopwords')
         stopwords.ensure_loaded()
         print("prayer request")
         serializer = PrayerSerializer(data=request.data)
