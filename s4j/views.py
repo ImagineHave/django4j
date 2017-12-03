@@ -40,7 +40,7 @@ class PrayerView(APIView):
             answers = []
             
             for word in tokenize(stemmed):
-                answers = answers + list(AnswerModel.objects.filter(words=word))
+                answers = answers + list(set(AnswerModel.objects.filter(words=word)))
             
             if len(answers) == 0:
                 print("Returning random answer")
