@@ -78,7 +78,7 @@ class PrayerView(APIView):
             p = 0
             while i <= x and p <= 100:
                 rank = ranked[i]
-                if PrayerModel.objects.filter(amswer=rank.getAnswer()).exists():
+                if PrayerModel.objects.filter(answer=rank.getAnswer()).exists():
                     i+=1
                 else:
                     prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=i, answer=rank.getAnswer())
