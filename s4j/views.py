@@ -46,7 +46,7 @@ class PrayerView(APIView):
             if len(answers) == 0:
                 print("No words in database returning random answer")
                 answers = list(AnswerModel.objects.all())
-                for x in range(1,1000):
+                for x in range(1,100):
                     randomAnswer = random.choice(answers)
                     prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=x, answer=randomAnswer)
                     #prayerModel.answers.add(randomAnswer)
@@ -69,7 +69,7 @@ class PrayerView(APIView):
             ranked.sort(key=lambda x: x.rank, reverse=True)
             
             #get top 1000
-            ranked = ranked[0:999]
+            ranked = ranked[0:99]
             
             answers = []
             i = 1
