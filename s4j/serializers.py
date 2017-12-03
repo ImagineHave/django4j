@@ -68,7 +68,7 @@ class PrayerSerializer(serializers.ModelSerializer):
     answer = AnswerSerializer(read_only=True)
     class Meta:
         model = PrayerModel
-        fields = ('id', 'prayer', 'answer')
+        fields = ('prayer', 'answer')
         
 class GenreSerializer(serializers.ModelSerializer):
     n = serializers.CharField(source='genre')

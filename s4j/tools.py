@@ -27,18 +27,6 @@ def processWords(text):
     
 tokenize = lambda doc: doc.split()
 
-class BestMatch():
-    
-    def __init__(self):
-        self.bestMatch = None
-        
-    def set(self, bestMatch, stemmed):
-        if(self.bestMatch == None):
-            self.bestMatch = bestMatch
-        else:
-            self.bestMatch = max([self.bestMatch, bestMatch], key=lambda item: cosine_sim(stemmed, item.processed))
-  
-            
 class RankAnswer():
     
     def __init__(self, prayer, answer):
