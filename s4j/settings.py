@@ -81,12 +81,8 @@ WSGI_APPLICATION = 's4j.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 # heroku setup
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+db_from_env = dj_database_url.config()
+DATABASES = { 'default': dj_database_url.config() }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
