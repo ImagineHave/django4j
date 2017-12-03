@@ -43,10 +43,8 @@ class PrayerView(APIView):
             for word in tokenize(stemmed):
                 answers = answers + list(AnswerModel.objects.filter(words=word))
                 
-            answers = list(set(answers))
-            
             if len(answers) == 0:
-                print("Returning random answer")
+                print("No words in database returning random answer")
                 answers = list(AnswerModel.objects.all())
                 for x in range(1,1000):
                     randomAnswer = random.choice(answers)
@@ -57,8 +55,12 @@ class PrayerView(APIView):
                 answer = prayerModel.answers.first()
                 serializer = PrayerSerializer(prayerModel)
                 return Response(serializer.data, status=status.HTTP_200_OK)
+              
+            print("Processing non unique" + str(len(answers)) + " answers")  
                 
-            print("Processing " + str(len(answers)) + " answers")
+            answers = list(set(answers))
+                
+            print("Processing unique" + str(len(answers)) + " answers")
             
             ranked = []
             for answer in answers:
