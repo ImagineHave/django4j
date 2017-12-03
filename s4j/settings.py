@@ -159,3 +159,4 @@ MESSAGE_LEVEL = message_constants.SUCCESS
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
+DATA_UPLOAD_MAX_NUMBER_FIELDS=2000
