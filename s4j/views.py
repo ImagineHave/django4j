@@ -72,9 +72,9 @@ class PrayerView(APIView):
             answers = []
             i = 1
             for rank in ranked:
+                print(rank.getAnswer)
                 prayerModel = PrayerModel.objects.create(prayer=request.data.get("prayer"), rank=i, answer=rank.getAnswer())
                 i+=1
-                #prayerModel.answers.add(rank.getAnswer())
             
             prayerModel = PrayerModel.objects.filter(prayer=request.data.get("prayer"), rank=1).first()
             serializer = PrayerSerializer(prayerModel)
