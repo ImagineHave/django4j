@@ -36,6 +36,7 @@ class PrayerView(APIView):
             
             if PrayerModel.objects.filter(prayer=clean_prayer).exists():
                 prayerModel = PrayerModel.objects.filter(prayer=clean_prayer).aggregate(Min('rank'))
+                print(prayerModel)
                 serializer = PrayerSerializer(prayerModel)
                 print("Already saved :")
                 print("prayerModel")
