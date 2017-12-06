@@ -16,6 +16,7 @@ from rest_framework.parsers import JSONParser
 from nltk.corpus import stopwords
 from django.http import HttpResponse
 from s4j.tools import *
+from django.db.models import Min
 
 logging.basicConfig(level=logging.DEBUG,
                     format='(%(threadName)-10s) %(message)s',
@@ -34,7 +35,7 @@ class PrayerView(APIView):
             print("prayer: " + clean_prayer)
             
             if PrayerModel.objects.filter(prayer=clean_prayer).exists():
-                prayerModel = PrayerModel.objects.filter(prayer=clean_prayer, rank=1).first()
+                prayerModel = PrayerModel.objects.filter(prayer=clean_prayer).aggregate(Min('rank')).first()
                 serializer = PrayerSerializer(prayerModel)
                 print("Already saved :")
                 print("prayerModel")
