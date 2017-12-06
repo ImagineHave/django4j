@@ -37,6 +37,8 @@ class PrayerView(APIView):
                 prayerModel = PrayerModel.objects.filter(prayer=clean_prayer, rank=1).first()
                 serializer = PrayerSerializer(prayerModel)
                 print("Already saved :")
+                print("prayerModel")
+                print(serializer.data)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             
             stemmed = processWords(clean_prayer)
