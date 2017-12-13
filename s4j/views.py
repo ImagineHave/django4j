@@ -79,7 +79,7 @@ class PrayerView(APIView):
             #get top 100
             x = len(ranked)
             
-            print(len(ranked))
+            print("length: " + str(x))
             
             i = 0
             p = 0
@@ -89,11 +89,11 @@ class PrayerView(APIView):
                     i+=1
                 else:
                     i+=1
-                    prayerModel = PrayerModel.objects.create(prayer=clean_prayer, rank=i, answer=rank.getAnswer())
                     p+=1
+                    PrayerModel.objects.create(prayer=clean_prayer, rank=p, answer=rank.getAnswer())
                 
             
-            prayerModel = PrayerModel.objects.filter(prayer=clean_prayer, rank=1).first()
+            prayerModel = PrayerModel.objects.filter(prayer=clean_prayer).order_by('rank').first()
             serializer = PrayerSerializer(prayerModel)
             gc.enable()
             return Response(serializer.data, status=status.HTTP_200_OK)
