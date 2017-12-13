@@ -78,6 +78,9 @@ class PrayerView(APIView):
             
             #get top 100
             x = len(ranked)
+            
+            print(len(ranked))
+            
             i = 0
             p = 0
             while i <= (x - 1) and p <= 100:
