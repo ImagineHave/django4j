@@ -61,7 +61,7 @@ class PrayerView(APIView):
                         x += 1
                         prayerModel = PrayerModel.objects.create(prayer=clean_prayer, rank=x, answer=randomAnswer)
                 
-                prayerModel = PrayerModel.objects.filter(prayer=clean_prayer, rank=1).first()
+                prayerModel = PrayerModel.objects.filter(prayer=clean_prayer).order_by('rank').first()
                 serializer = PrayerSerializer(prayerModel)
                 return Response(serializer.data, status=status.HTTP_200_OK)
               
